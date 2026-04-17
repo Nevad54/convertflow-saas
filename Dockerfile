@@ -10,6 +10,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     fontconfig \
     libreoffice \
     tesseract-ocr \
+    gcc \
+    pkg-config \
+    libcairo2-dev \
+    python3-dev \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
