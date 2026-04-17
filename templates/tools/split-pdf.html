@@ -1,0 +1,119 @@
+﻿{% extends "base.html" %}
+{% block title %}Split PDF{% endblock %}
+{% block content %}
+<canvas id="split-pdf-scene" data-tool-scene aria-hidden="true"></canvas>
+<div class="tool-scene-vignette tool-scene-vignette--left" aria-hidden="true"></div>
+
+<section class="hero hero--tool">
+  <a class="back-link" href="/">
+    <svg viewBox="0 0 16 16" fill="none" style="width:14px;height:14px;vertical-align:-.15em"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    All tools
+  </a>
+  <p class="eyebrow">Prepare PDFs</p>
+  <h1>Split PDFs into <span class="highlight">separate pages</span>.</h1>
+  <p class="lede">Turn one PDF into individual page files so you can share, archive, or recombine only the parts you need.</p>
+</section>
+
+<div class="tool-layout">
+  <section class="panel">
+    <form class="form" action="/convert/split-pdf" method="post" enctype="multipart/form-data">
+      <div class="form-cluster">
+        <div class="form-cluster__header">
+          <p class="eyebrow">Input</p>
+          <span>Upload a PDF to break into one-page files.</span>
+        </div>
+        <label class="upload upload--drop">
+          <input type="file" name="file" accept=".pdf" required>
+          <div class="upload-inner">
+            <svg class="upload-icon" viewBox="0 0 48 48" fill="none"><rect x="8" y="12" width="32" height="26" rx="4" fill="#a24b2a" opacity=".1"/><rect x="8" y="12" width="32" height="26" rx="4" stroke="#a24b2a" stroke-width="1.8"/><path d="M24 20v12M20 24l4-4 4 4" stroke="#a24b2a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <strong>Choose a PDF file or drag and drop</strong>
+            <span>One PDF file only.</span>
+          </div>
+        </label>
+      </div>
+
+      <div class="action-strip">
+        <div class="action-strip__copy">
+          <strong>Ready to split</strong>
+          <span>We'll export each page as its own PDF and bundle multi-page results in a ZIP file.</span>
+        </div>
+        <button type="submit">Split and Download</button>
+      </div>
+    </form>
+  </section>
+
+  <aside class="tool-tips">
+    <div class="tool-tips__hero">
+      <p class="eyebrow">Workflow</p>
+      <h3>Best for handouts, page extraction, and page-level sharing.</h3>
+      <p>Use this when you want every page as a separate file instead of only a selected subset.</p>
+    </div>
+    <div class="tool-tip-pills">
+      <span>Handouts</span>
+      <span>Page review</span>
+      <span>Archive</span>
+      <span>Sharing</span>
+    </div>
+    <h3>Tips</h3>
+    <ul>
+      <li>A one-page PDF downloads directly. Multi-page results come as a ZIP archive.</li>
+      <li>Use <a href="/tool/extract-pages">Extract Pages</a> if you only need specific pages.</li>
+    </ul>
+  </aside>
+</div>
+<script type="module">
+import { THREE, createGlowSprite, mountToolScene } from "/static/tool-scene.js";
+
+mountToolScene({
+  canvasId: "split-pdf-scene",
+  setup({ scene, data }) {
+    const group = new THREE.Group();
+    group.position.set(-5.0, 1.6, -6.5);
+    scene.add(group);
+
+    // Fan of pages spreading out from center
+    const pages = [];
+    const pageAngles = [-0.38, -0.14, 0.1, 0.34, 0.58];
+    pageAngles.forEach((angle, i) => {
+      const mesh = new THREE.Mesh(
+        new THREE.PlaneGeometry(2.8, 3.8),
+        new THREE.MeshBasicMaterial({
+          color: i === 2 ? 0xa24b2a : 0xf0ece4,
+          transparent: true,
+          opacity: i === 2 ? 0.13 : 0.07,
+          side: THREE.DoubleSide
+        })
+      );
+      mesh.rotation.z = angle;
+      mesh.position.x = Math.sin(angle) * 1.4;
+      pages.push({ mesh, baseAngle: angle });
+      group.add(mesh);
+    });
+
+    const glow = createGlowSprite({ inner: "rgba(232,168,56,0.16)", middle: "rgba(212,74,26,0.06)", scale: 11 });
+    glow.position.copy(group.position);
+    scene.add(glow);
+
+    Object.assign(data, { group, pages, glow });
+  },
+  frame({ camera, pointer, state, data }, elapsed) {
+    const { group, pages, glow } = data;
+    if (!group) return;
+    camera.position.x = pointer.x * 0.35;
+    camera.position.y = -pointer.y * 0.25;
+    camera.lookAt(0, 0, -3);
+    const spread = 1 + state.energy * 0.6;
+    pages.forEach(({ mesh, baseAngle }) => {
+      mesh.rotation.z = baseAngle * spread;
+      mesh.position.x = Math.sin(baseAngle * spread) * 1.4;
+    });
+    group.rotation.y = Math.sin(elapsed * 0.28) * 0.07;
+    group.position.y = 1.6 + Math.sin(elapsed * 0.58) * 0.11;
+    glow.position.copy(group.position);
+    glow.scale.setScalar(11 + state.energy * 1.4);
+    glow.material.opacity = 0.3 + state.energy * 0.16;
+  }
+});
+</script>
+{% endblock %}
+

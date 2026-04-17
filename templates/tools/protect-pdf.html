@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %}Protect PDF{% endblock %}
+{% block content %}
+{% set tool_scene_name = "protect" %}
+{% set tool_scene_canvas_id = "protect-pdf-scene" %}
+{% set tool_scene_vignette_class = "tool-scene-vignette tool-scene-vignette--right" %}
+{% include "partials/tool_scene.html" %}
+
+<section class="hero hero--tool">
+  <a class="back-link" href="/">
+    <svg viewBox="0 0 16 16" fill="none" style="width:14px;height:14px;vertical-align:-.15em"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    All tools
+  </a>
+  <p class="eyebrow">Secure the handoff</p>
+  <h1>Protect PDFs with <span class="highlight">password security</span>.</h1>
+  <p class="lede">Encrypt a PDF before sharing so only people with the password can open the file.</p>
+</section>
+
+<div class="tool-layout">
+  <section class="panel">
+    <form class="form" action="/convert/protect-pdf" method="post" enctype="multipart/form-data">
+      <div class="form-cluster">
+        <div class="form-cluster__header">
+          <p class="eyebrow">Input</p>
+          <span>Upload the PDF you want to secure.</span>
+        </div>
+        <label class="upload upload--drop">
+          <input type="file" name="file" accept=".pdf" required>
+          <div class="upload-inner">
+            <svg class="upload-icon" viewBox="0 0 48 48" fill="none"><rect x="8" y="12" width="32" height="26" rx="4" fill="#a24b2a" opacity=".1"/><rect x="8" y="12" width="32" height="26" rx="4" stroke="#a24b2a" stroke-width="1.8"/><path d="M24 20v12M20 24l4-4 4 4" stroke="#a24b2a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <strong>Choose a PDF file or drag and drop</strong>
+            <span>One PDF file only.</span>
+          </div>
+        </label>
+      </div>
+
+      <div class="form-cluster">
+        <div class="form-cluster__header">
+          <p class="eyebrow">Security</p>
+          <span>Set the password needed to open the final file.</span>
+        </div>
+        <label class="field">
+          <span>Password</span>
+          <input type="password" name="password" placeholder="Enter a strong password" required autocomplete="new-password">
+        </label>
+      </div>
+
+      <div class="action-strip">
+        <div class="action-strip__copy">
+          <strong>Ready to protect</strong>
+          <span>We'll encrypt the PDF and start the secure download once the file is ready.</span>
+        </div>
+        <button type="submit">Protect and Download</button>
+      </div>
+    </form>
+  </section>
+
+  <aside class="tool-tips">
+    <div class="tool-tips__hero">
+      <p class="eyebrow">Workflow</p>
+      <h3>Add password protection before you send or archive the file.</h3>
+      <p>This is best for confidential drafts, contracts, client deliverables, and internal documents.</p>
+    </div>
+    <div class="tool-tip-pills">
+      <span>Private files</span>
+      <span>Contracts</span>
+      <span>Client docs</span>
+      <span>Archive</span>
+    </div>
+    <h3>Tips</h3>
+    <ul>
+      <li>Uses AES-256 encryption (PDF revision 6).</li>
+      <li>Keep the password somewhere safe because there is no recovery without it.</li>
+      <li>To remove a password later, use <a href="/tool/unlock-pdf">Unlock PDF</a>.</li>
+    </ul>
+  </aside>
+</div>
+{% endblock %}

@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+{% block title %}AI PDF Summarizer{% endblock %}
+{% block content %}
+<canvas id="summarize-pdf-scene" data-tool-scene aria-hidden="true"></canvas>
+<div class="tool-scene-vignette tool-scene-vignette--right" aria-hidden="true"></div>
+
+<section class="hero hero--tool">
+  <a class="back-link" href="/">
+    <svg viewBox="0 0 16 16" fill="none" style="width:14px;height:14px;vertical-align:-.15em"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    All tools
+  </a>
+  <p class="eyebrow">Optional AI assist</p>
+  <h1>Summarize any PDF with <span class="highlight">local AI.</span></h1>
+  <p class="lede">Upload a PDF and get a concise, structured summary generated entirely on your device — no cloud, no API key, no data leaving your machine.</p>
+</section>
+
+<div class="tool-layout">
+  <section class="panel">
+    <form class="form" action="/convert/summarize-pdf" method="post" enctype="multipart/form-data">
+      <div class="form-cluster">
+        <div class="form-cluster__header">
+          <p class="eyebrow">Input</p>
+          <span>Upload the PDF you want summarized.</span>
+        </div>
+        <label class="upload upload--drop">
+          <input type="file" name="file" accept=".pdf" required>
+          <div class="upload-inner">
+            <svg class="upload-icon" viewBox="0 0 48 48" fill="none"><rect x="8" y="12" width="32" height="26" rx="4" fill="#a24b2a" opacity=".1"/><rect x="8" y="12" width="32" height="26" rx="4" stroke="#a24b2a" stroke-width="1.8"/><path d="M24 20v12M20 24l4-4 4 4" stroke="#a24b2a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <strong>Choose a PDF or drag and drop</strong>
+            <span>Works on reports, contracts, research papers, and any multi-page document.</span>
+          </div>
+        </label>
+      </div>
+
+      <div class="form-cluster">
+        <div class="form-cluster__header">
+          <p class="eyebrow">Options</p>
+          <span>Choose engine, summary depth, and output format.</span>
+        </div>
+        <label class="field">
+          <span>AI engine</span>
+          <select name="engine">
+            <option value="auto">auto — Ollama first, GitHub fallback</option>
+            <option value="ollama">ollama (Gemma 4) — local, works on scans</option>
+            <option value="github">github models — cloud, fast on text PDFs</option>
+            <option value="openai">openai — requires OPENAI_API_KEY</option>
+          </select>
+        </label>
+        <div class="field-row">
+          <label class="field">
+            <span>Summary length</span>
+            <select name="length">
+              <option value="brief">brief — 2–3 sentences</option>
+              <option value="standard" selected>standard — structured overview</option>
+              <option value="detailed">detailed — full breakdown</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>Output format</span>
+            <select name="output_format">
+              <option value="txt" selected>.txt — plain text</option>
+              <option value="docx">.docx — Word document</option>
+              <option value="pdf">.pdf — formatted PDF</option>
+            </select>
+          </label>
+        </div>
+      </div>
+
+      <div class="action-strip">
+        <div class="action-strip__copy">
+          <strong>Ready to summarize?</strong>
+          <span>AI reads every page and distils the key points. Allow ~30–60 sec per page with Ollama.</span>
+        </div>
+        <button type="submit">Summarize and Download</button>
+      </div>
+    </form>
+  </section>
+
+  <aside class="tool-tips">
+    <div class="tool-tips__hero">
+      <p class="eyebrow">Workflow</p>
+      <h3>Get the key points from any document in seconds.</h3>
+      <p>Gemma 4 reads each page visually, extracts key points, then produces a final structured summary — all on your device.</p>
+    </div>
+    <div class="tool-tip-pills">
+      <span>Reports</span>
+      <span>Contracts</span>
+      <span>Research</span>
+      <span>Meeting notes</span>
+    </div>
+    <h3>Tips</h3>
+    <ul>
+      <li>Requires <code>ollama serve</code> running with <code>gemma4:e4b</code> pulled.</li>
+      <li><strong>brief</strong> gives a 2–3 sentence overview — great for a quick read.</li>
+      <li><strong>standard</strong> includes main sections and key facts — the default choice.</li>
+      <li><strong>detailed</strong> produces a full structured breakdown with headings, data points, and conclusions.</li>
+      <li>Processing time: roughly 30–60 seconds per page. A 10-page report takes 5–10 minutes.</li>
+      <li>Works on scanned PDFs too — Gemma 4 reads each page as an image.</li>
+    </ul>
+  </aside>
+</div>
+
+<script type="module">
+import { THREE, createGlowSprite, mountToolScene } from "/static/tool-scene.js";
+
+mountToolScene({
+  canvasId: "summarize-pdf-scene",
+  setup({ scene, data }) {
+    const group = new THREE.Group();
+    group.position.set(5.2, 1.8, -6.4);
+    scene.add(group);
+
+    const mat = (opacity, color) => new THREE.LineBasicMaterial({ color, transparent: true, opacity });
+
+    // Many text lines converging into fewer summary lines
+    const srcLines = new THREE.Group();
+    srcLines.position.set(-1.9, 0, 0);
+    [1.4, 1.0, 0.6, 0.2, -0.2, -0.6, -1.0, -1.4].forEach((y, i) => {
+      const w = 1.6 + (i % 3) * 0.2;
+      srcLines.add(new THREE.Line(
+        new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-w/2, y, 0), new THREE.Vector3(w/2, y, 0)]),
+        mat(0.08 + (i % 2) * 0.04, 0xf0c060)
+      ));
+    });
+    group.add(srcLines);
+
+    // Funnel / converging lines
+    const funnelPts = [
+      new THREE.Vector3(-0.3, 0.7, 0), new THREE.Vector3(0, 0, 0),
+      new THREE.Vector3(-0.3, -0.7, 0), new THREE.Vector3(0, 0, 0),
+      new THREE.Vector3(0.3, 0, 0),
+    ];
+    group.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(funnelPts), mat(0.18, 0xe8a838)));
+
+    // Fewer summary lines on the right
+    const sumLines = new THREE.Group();
+    sumLines.position.set(1.8, 0, 0);
+    [0.6, 0.0, -0.6].forEach((y, i) => {
+      const w = 1.4 - i * 0.1;
+      sumLines.add(new THREE.Line(
+        new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-w/2, y, 0), new THREE.Vector3(w/2, y, 0)]),
+        mat(0.22, 0xe8a838)
+      ));
+    });
+    group.add(sumLines);
+
+    // Rings around the summary
+    [1.2, 1.7].forEach((r, i) => {
+      const pts = Array.from({ length: 64 }, (_, k) => {
+        const a = (k / 64) * Math.PI * 2;
+        return new THREE.Vector3(Math.cos(a) * r, Math.sin(a) * r * 0.6, 0);
+      });
+      sumLines.add(new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints(pts),
+        mat(0.1 + i * 0.04, 0xf0c060)));
+    });
+
+    const glow = createGlowSprite({ inner: "rgba(232,168,56,0.22)", middle: "rgba(212,74,26,0.08)", scale: 12 });
+    glow.position.copy(group.position);
+    scene.add(glow);
+
+    Object.assign(data, { group, glow, srcLines, sumLines });
+  },
+  frame({ camera, pointer, state, data }, elapsed) {
+    const { group, glow } = data;
+    if (!group) return;
+    camera.position.x = pointer.x * 0.35;
+    camera.position.y = -pointer.y * 0.25;
+    camera.lookAt(0, 0, -3);
+    group.rotation.y = Math.sin(elapsed * 0.28) * 0.07 + pointer.x * 0.04;
+    group.rotation.x = Math.sin(elapsed * 0.18) * 0.03;
+    group.position.y = 1.8 + Math.sin(elapsed * 0.6) * 0.1;
+    glow.position.copy(group.position);
+    glow.scale.setScalar(12 + state.energy * 1.5 + state.success * 1.8);
+    glow.material.opacity = 0.34 + state.energy * 0.2;
+  }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+{% block title %}Recover Scanned Files | ConvertFlow{% endblock %}
+{% block content %}
+{% set tool_scene_name = "ocr" %}
+{% set tool_scene_canvas_id = "ocr-scene" %}
+{% set tool_scene_vignette_class = "ocr-scene-vignette" %}
+{% include "partials/tool_scene.html" %}
+
+<section class="hero hero--tool">
+  <a class="back-link" href="/">
+    <svg viewBox="0 0 16 16" fill="none" style="width:14px;height:14px;vertical-align:-.15em"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    All tools
+  </a>
+  <p class="eyebrow">Recover scanned files</p>
+  <h1>Turn scans into <span class="highlight">working documents</span>.</h1>
+  <p class="lede">Upload screenshots, photos, invoices, forms, or scanned pages and rebuild them into editable outputs from the same local-first workspace.</p>
+</section>
+
+<div class="tool-layout">
+  <section class="panel">
+    <form class="form" action="/convert/image-to-doc" method="post" enctype="multipart/form-data">
+      <div class="form-cluster">
+        <div class="form-cluster__header">
+          <p class="eyebrow">Input</p>
+          <span>Choose the scanned files you want to recover and export.</span>
+        </div>
+
+        <label class="field">
+          <span>Document title <em class="optional">optional</em></span>
+          <input type="text" name="title" placeholder="e.g. Contract draft, Inventory list...">
+        </label>
+
+        <label class="upload upload--drop" id="dropzone">
+          <input type="file" name="files" accept="image/*" multiple required>
+          <div class="upload-inner">
+            <svg class="upload-icon" viewBox="0 0 48 48" fill="none"><rect x="8" y="12" width="32" height="26" rx="4" fill="#a24b2a" opacity=".1"/><rect x="8" y="12" width="32" height="26" rx="4" stroke="#a24b2a" stroke-width="1.8"/><path d="M24 20v12M20 24l4-4 4 4" stroke="#a24b2a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><line x1="14" y1="36" x2="34" y2="36" stroke="#a24b2a" stroke-width="1.5" stroke-linecap="round" opacity=".4"/></svg>
+            <strong id="upload-label">Choose images or drag and drop</strong>
+            <span>PNG, JPG, TIFF, BMP, GIF, and WEBP. Multiple files are allowed.</span>
+          </div>
+        </label>
+      </div>
+
+      <div class="form-cluster">
+        <div class="form-cluster__header">
+          <p class="eyebrow">Output</p>
+          <span>Pick the destination format and the extraction engine that fits this document.</span>
+        </div>
+
+        <div class="field-row">
+          <label class="field">
+            <span>Output format</span>
+            <select name="output_format" id="output-format" required>
+              {% for format in formats %}
+              <option value="{{ format }}">.{{ format }}</option>
+              {% endfor %}
+            </select>
+          </label>
+          <label class="field">
+            <span>Recovery engine</span>
+            <select name="ocr_engine" required>
+              {% for engine in ocr_engines %}
+              <option value="{{ engine }}" {% if engine == "auto" %}selected{% endif %}>{{ engine }}</option>
+              {% endfor %}
+            </select>
+          </label>
+          <label class="field">
+            <span>Document style</span>
+            <select name="document_style" required>
+              {% for style in document_styles %}
+              <option value="{{ style }}" {% if style == "auto" %}selected{% endif %}>{{ style }}</option>
+              {% endfor %}
+            </select>
+          </label>
+        </div>
+      </div>
+
+      <div class="field fieldset" id="pdf-extras" hidden>
+        <span>PDF options</span>
+        <label class="checkline">
+          <input type="checkbox" name="pdf_page_numbers" value="true">
+          <span>Add page numbers to PDF output</span>
+        </label>
+        <input type="text" name="pdf_watermark" placeholder="Watermark text for PDF output only">
+        <small class="hint">These options only apply when the output format is <code>.pdf</code>.</small>
+      </div>
+
+      <div class="action-strip">
+        <div class="action-strip__copy">
+          <strong>Ready to recover</strong>
+          <span>We'll process the file locally by default and start the download when the output is ready.</span>
+        </div>
+        <button type="submit">
+          <svg viewBox="0 0 20 20" fill="none" style="width:16px;height:16px;vertical-align:-.2em;margin-right:6px"><path d="M4 10l4 4 8-8" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Convert and Download
+        </button>
+      </div>
+    </form>
+  </section>
+
+  <aside class="tool-tips">
+    <div class="tool-tips__hero">
+      <p class="eyebrow">Workflow</p>
+      <h3>Best results come from cleaner scans and the right document profile.</h3>
+      <p>Use the style selector to tell the recovery pipeline how to rebuild the document instead of forcing one generic OCR pass.</p>
+    </div>
+    <div class="tool-tip-pills">
+      <span>Legal docs</span>
+      <span>Forms</span>
+      <span>Invoices</span>
+      <span>Multi-page scans</span>
+    </div>
+    <h3>Tips</h3>
+    <ul>
+      <li><strong>auto</strong> tries the available recovery engines in order and falls back to local OCR when cloud engines are not configured.</li>
+      <li><strong>tesseract</strong> and <strong>ollama</strong> keep processing on your machine.</li>
+      <li>Set <code>GITHUB_TOKEN</code> or <code>OPENAI_API_KEY</code> as environment variables only if you want optional cloud OCR engines.</li>
+      <li><strong>ollama</strong> runs locally via Gemma 4 and needs <code>ollama pull gemma4:e4b</code>.</li>
+      <li>Use <strong>legal</strong> style to preserve clause numbering and recitals.</li>
+      <li>Use <strong>form</strong> style for invoices, tables, and checkboxes.</li>
+      <li>Images are sorted by filename before processing, so name them <code>01</code>, <code>02</code>, <code>03</code> if order matters.</li>
+    </ul>
+  </aside>
+</div>
+<script>
+  const outputFormat = document.getElementById("output-format");
+  const pdfExtras = document.getElementById("pdf-extras");
+
+  function togglePdfExtras() {
+    const isPdf = outputFormat && outputFormat.value === "pdf";
+    if (!pdfExtras) return;
+    pdfExtras.hidden = !isPdf;
+  }
+
+  if (outputFormat) {
+    outputFormat.addEventListener("change", togglePdfExtras);
+    togglePdfExtras();
+  }
+</script>
+{% endblock %}

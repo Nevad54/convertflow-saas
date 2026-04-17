@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Create account — ConvertFlow{% endblock %}
+{% block content %}
+<section class="auth-shell">
+  <div class="auth-card">
+    <div class="auth-card__header">
+      <h1>Create a free account</h1>
+      <p>Get 10 conversions per day. No credit card required.</p>
+    </div>
+
+    {% if error %}
+    <div class="auth-card__error" role="alert">{{ error }}</div>
+    {% endif %}
+
+    <form class="auth-form" method="post" action="/auth/signup">
+      <div class="field">
+        <label for="email">Email</label>
+        <input
+          id="email"
+          name="email"
+          type="email"
+          autocomplete="email"
+          required
+          placeholder="you@example.com"
+        >
+      </div>
+      <div class="field">
+        <label for="password">Password</label>
+        <input
+          id="password"
+          name="password"
+          type="password"
+          autocomplete="new-password"
+          required
+          placeholder="At least 8 characters"
+          minlength="8"
+        >
+      </div>
+      <button type="submit" class="btn btn--primary btn--full">Create account</button>
+    </form>
+
+    <p class="auth-card__switch">
+      Already have an account? <a href="/auth/login">Sign in</a>
+    </p>
+
+    <p class="auth-card__fine">
+      By signing up you agree to use ConvertFlow for lawful purposes only.
+      Your files are processed locally and not stored beyond the conversion window.
+    </p>
+  </div>
+</section>
+{% endblock %}

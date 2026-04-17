@@ -1,0 +1,426 @@
+{% extends "base.html" %}
+{% block title %}Sign PDF{% endblock %}
+{% block content %}
+<canvas id="sign-pdf-scene" data-tool-scene aria-hidden="true"></canvas>
+<div class="tool-scene-vignette tool-scene-vignette--right" aria-hidden="true"></div>
+
+<section class="hero hero--tool">
+  <a class="back-link" href="/">
+    <svg viewBox="0 0 16 16" fill="none" style="width:14px;height:14px;vertical-align:-.15em"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    All tools
+  </a>
+  <p class="eyebrow">Review and finalize</p>
+  <h1>Draw your signature and <span class="highlight">embed it in a PDF.</span></h1>
+  <p class="lede">Draw your signature on screen, choose where it appears, then download the signed PDF — no printer, no scanner, no cloud.</p>
+</section>
+
+<div class="tool-layout">
+  <section class="panel" id="sign-panel">
+
+    <div class="form" id="sign-form-ui">
+
+      <!-- PDF upload -->
+      <div class="form-cluster">
+        <div class="form-cluster__header">
+          <p class="eyebrow">Input</p>
+          <span>Upload the PDF to sign.</span>
+        </div>
+        <label class="upload upload--drop" id="sign-drop-zone">
+          <input type="file" id="sign-file-input" accept=".pdf">
+          <div class="upload-inner">
+            <svg class="upload-icon" viewBox="0 0 48 48" fill="none"><rect x="8" y="12" width="32" height="26" rx="4" fill="#a24b2a" opacity=".1"/><rect x="8" y="12" width="32" height="26" rx="4" stroke="#a24b2a" stroke-width="1.8"/><path d="M24 20v12M20 24l4-4 4 4" stroke="#a24b2a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <strong id="sign-upload-label">Choose a PDF file or drag and drop</strong>
+          </div>
+        </label>
+      </div>
+
+      <!-- Signature pad -->
+      <div class="form-cluster">
+        <div class="form-cluster__header">
+          <p class="eyebrow">Signature</p>
+          <span>Draw your signature below. Use your mouse or touch screen.</span>
+        </div>
+        <div class="sig-pad-wrap">
+          <canvas id="sig-canvas" width="600" height="180" aria-label="Signature drawing area"></canvas>
+          <div class="sig-pad-hint" id="sig-hint">Draw your signature here</div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button type="button" id="sig-clear-btn" class="btn-ghost">Clear signature</button>
+          <span id="sig-status" style="font-size:12px;color:var(--fg-muted);align-self:center"></span>
+        </div>
+      </div>
+
+      <!-- Options -->
+      <div class="form-cluster">
+        <div class="form-cluster__header">
+          <p class="eyebrow">Options</p>
+          <span>Choose where the signature appears.</span>
+        </div>
+        <div class="field-row">
+          <label class="field">
+            <span>Position</span>
+            <select id="sig-position">
+              <option value="bottom-right" selected>Bottom right</option>
+              <option value="bottom-left">Bottom left</option>
+              <option value="top-right">Top right</option>
+              <option value="top-left">Top left</option>
+              <option value="center">Center</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>Page</span>
+            <select id="sig-page">
+              <option value="-1" selected>Last page</option>
+              <option value="0">First page</option>
+              <option value="custom">Custom page number…</option>
+            </select>
+          </label>
+        </div>
+        <label class="field" id="sig-custom-page-wrap" style="display:none">
+          <span>Page number (1 = first)</span>
+          <input type="number" id="sig-custom-page" min="1" value="1" style="max-width:120px">
+        </label>
+        <label class="field">
+          <span>Signature width</span>
+          <select id="sig-width">
+            <option value="40">Small — 40 mm</option>
+            <option value="60" selected>Medium — 60 mm</option>
+            <option value="80">Large — 80 mm</option>
+            <option value="110">Extra large — 110 mm</option>
+          </select>
+        </label>
+      </div>
+
+      <!-- Submit -->
+      <div class="action-strip">
+        <div class="action-strip__copy">
+          <strong>Ready to sign</strong>
+          <span>Your signature will be embedded into the PDF and the signed file will download.</span>
+        </div>
+        <button type="button" id="sign-submit-btn" disabled>Sign and Download</button>
+      </div>
+      <div id="sign-progress" style="display:none;margin-top:14px">
+        <div class="progress-bar-bg" aria-hidden="true"><div class="progress-bar-fill" id="sign-progress-fill" style="width:0%"></div></div>
+        <div class="progress-info"><span class="label" id="sign-progress-label">Signing PDF…</span></div>
+      </div>
+
+    </div>
+  </section>
+
+  <aside class="tool-tips">
+    <div class="tool-tips__hero">
+      <p class="eyebrow">How it works</p>
+      <h3>Sign without printing or scanning.</h3>
+      <p>Your drawn signature is exported as a PNG and embedded directly into the PDF using pymupdf — no rasterisation of the rest of the document.</p>
+    </div>
+    <div class="tool-tip-pills">
+      <span>Contracts</span>
+      <span>Agreements</span>
+      <span>Forms</span>
+      <span>Letters</span>
+    </div>
+    <h3>Tips</h3>
+    <ul>
+      <li>Use a mouse, stylus, or touchscreen for best signature quality.</li>
+      <li>The signature background is transparent — it sits cleanly on top of the PDF content.</li>
+      <li>Choose <strong>bottom right</strong> for most forms, or <strong>center</strong> for signature pages.</li>
+      <li>The signature is embedded at your chosen page. To sign multiple pages, apply this tool again.</li>
+      <li>Use a larger width (80–110 mm) for A4 pages, smaller for compact forms.</li>
+    </ul>
+  </aside>
+</div>
+
+<style>
+.sig-pad-wrap {
+  position: relative;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: #fff;
+  overflow: hidden;
+  cursor: crosshair;
+  touch-action: none;
+}
+.sig-pad-wrap:focus-within,
+.sig-pad-wrap:hover { border-color: var(--border-hov); }
+#sig-canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 200px;
+}
+.sig-pad-hint {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #bbb;
+  font-size: 14px;
+  pointer-events: none;
+  transition: opacity .2s;
+}
+.sig-pad-hint.hidden { opacity: 0; }
+.btn-ghost {
+  background: transparent;
+  border: 1.5px solid var(--border);
+  color: var(--fg-muted);
+  padding: 6px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  cursor: pointer;
+  font-family: var(--font-sans);
+  transition: border-color .18s, color .18s;
+}
+.btn-ghost:hover { border-color: var(--border-hov); color: var(--fg); }
+</style>
+
+<script>
+(function () {
+  // ── Canvas setup ─────────────────────────────
+  const canvas = document.getElementById('sig-canvas');
+  const ctx = canvas.getContext('2d');
+  const hint = document.getElementById('sig-hint');
+  const clearBtn = document.getElementById('sig-clear-btn');
+  const sigStatus = document.getElementById('sig-status');
+  let drawing = false;
+  let hasSig = false;
+
+  function getPos(e) {
+    const r = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / r.width;
+    const scaleY = canvas.height / r.height;
+    if (e.touches) {
+      return { x: (e.touches[0].clientX - r.left) * scaleX, y: (e.touches[0].clientY - r.top) * scaleY };
+    }
+    return { x: (e.clientX - r.left) * scaleX, y: (e.clientY - r.top) * scaleY };
+  }
+
+  function startDraw(e) {
+    e.preventDefault();
+    drawing = true;
+    const p = getPos(e);
+    ctx.beginPath();
+    ctx.moveTo(p.x, p.y);
+    if (!hasSig) { hint.classList.add('hidden'); hasSig = true; checkReady(); }
+  }
+
+  function draw(e) {
+    if (!drawing) return;
+    e.preventDefault();
+    const p = getPos(e);
+    ctx.lineWidth = 2.5;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.strokeStyle = '#1a1a2e';
+    ctx.lineTo(p.x, p.y);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(p.x, p.y);
+  }
+
+  function endDraw(e) {
+    if (!drawing) return;
+    drawing = false;
+    ctx.beginPath();
+    sigStatus.textContent = 'Signature drawn ✓';
+  }
+
+  canvas.addEventListener('mousedown', startDraw);
+  canvas.addEventListener('mousemove', draw);
+  canvas.addEventListener('mouseup', endDraw);
+  canvas.addEventListener('mouseleave', endDraw);
+  canvas.addEventListener('touchstart', startDraw, { passive: false });
+  canvas.addEventListener('touchmove', draw, { passive: false });
+  canvas.addEventListener('touchend', endDraw);
+
+  clearBtn.addEventListener('click', () => {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    hasSig = false;
+    hint.classList.remove('hidden');
+    sigStatus.textContent = '';
+    checkReady();
+  });
+
+  // ── File input ───────────────────────────────
+  const fileInput = document.getElementById('sign-file-input');
+  const dropZone  = document.getElementById('sign-drop-zone');
+  const uploadLabel = document.getElementById('sign-upload-label');
+  let hasFile = false;
+
+  fileInput.addEventListener('change', () => {
+    if (fileInput.files[0]) {
+      uploadLabel.textContent = fileInput.files[0].name;
+      dropZone.classList.add('has-file');
+      hasFile = true;
+      checkReady();
+    }
+  });
+
+  ['dragenter','dragover'].forEach(ev => dropZone.addEventListener(ev, e => { e.preventDefault(); dropZone.classList.add('drag-over'); }));
+  ['dragleave','dragend'].forEach(ev => dropZone.addEventListener(ev, e => {
+    if (!e.relatedTarget || !dropZone.contains(e.relatedTarget)) dropZone.classList.remove('drag-over');
+  }));
+  dropZone.addEventListener('drop', e => {
+    e.preventDefault();
+    dropZone.classList.remove('drag-over');
+    const files = e.dataTransfer && e.dataTransfer.files;
+    if (files && files[0]) {
+      fileInput.files = files;
+      uploadLabel.textContent = files[0].name;
+      dropZone.classList.add('has-file');
+      hasFile = true;
+      checkReady();
+    }
+  });
+
+  // ── Options ──────────────────────────────────
+  const pageSelect = document.getElementById('sig-page');
+  const customWrap = document.getElementById('sig-custom-page-wrap');
+  pageSelect.addEventListener('change', () => {
+    customWrap.style.display = pageSelect.value === 'custom' ? 'grid' : 'none';
+  });
+
+  // ── Submit ───────────────────────────────────
+  const submitBtn = document.getElementById('sign-submit-btn');
+  const signProgress = document.getElementById('sign-progress');
+  const signFill = document.getElementById('sign-progress-fill');
+  const signLabel = document.getElementById('sign-progress-label');
+
+  function checkReady() {
+    submitBtn.disabled = !(hasFile && hasSig);
+  }
+
+  submitBtn.addEventListener('click', async () => {
+    const file = fileInput.files[0];
+    if (!file || !hasSig) return;
+
+    const sigDataUrl = canvas.toDataURL('image/png');
+    const position = document.getElementById('sig-position').value;
+    const sigWidth = document.getElementById('sig-width').value;
+    let pageNumber;
+    if (pageSelect.value === 'custom') {
+      pageNumber = parseInt(document.getElementById('sig-custom-page').value, 10) - 1;
+    } else {
+      pageNumber = parseInt(pageSelect.value, 10);
+    }
+
+    const fd = new FormData();
+    fd.append('file', file);
+    fd.append('signature_data', sigDataUrl);
+    fd.append('position', position);
+    fd.append('page_number', pageNumber);
+    fd.append('sig_width_mm', sigWidth);
+
+    submitBtn.disabled = true;
+    signProgress.style.display = 'block';
+    signFill.style.width = '15%';
+    signLabel.textContent = 'Embedding signature…';
+
+    let pct = 15;
+    const ticker = setInterval(() => {
+      pct = Math.min(pct + 14, 88);
+      signFill.style.width = pct + '%';
+    }, 250);
+
+    try {
+      const res = await fetch('/convert/sign-pdf', { method: 'POST', body: fd });
+      clearInterval(ticker);
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ detail: 'Signing failed.' }));
+        throw new Error(err.detail || 'Signing failed.');
+      }
+      const blob = await res.blob();
+      signFill.style.width = '100%';
+      signLabel.textContent = 'Done! Download starting…';
+
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'signed.pdf';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } catch (err) {
+      clearInterval(ticker);
+      signFill.style.width = '100%';
+      signLabel.textContent = 'Error: ' + err.message;
+    } finally {
+      submitBtn.disabled = false;
+      setTimeout(() => { signProgress.style.display = 'none'; }, 2500);
+    }
+  });
+})();
+</script>
+
+<script type="module">
+import { THREE, createGlowSprite, mountToolScene } from "/static/tool-scene.js";
+
+mountToolScene({
+  canvasId: "sign-pdf-scene",
+  setup({ scene, data }) {
+    const group = new THREE.Group();
+    group.position.set(5.2, 1.8, -6.4);
+    scene.add(group);
+
+    const lineMat = (opacity, color) => new THREE.LineBasicMaterial({ color, transparent: true, opacity });
+    const mat = (opacity, color) => new THREE.MeshBasicMaterial({ color, transparent: true, opacity });
+
+    // Document outline
+    const docBg = new THREE.Mesh(new THREE.PlaneGeometry(2.2, 3.0), mat(0.07, 0xa24b2a));
+    group.add(docBg);
+    const docEdge = new THREE.LineLoop(
+      new THREE.BufferGeometry().setFromPoints([
+        new THREE.Vector3(-1.1, 1.5, 0.01), new THREE.Vector3(1.1, 1.5, 0.01),
+        new THREE.Vector3(1.1, -1.5, 0.01), new THREE.Vector3(-1.1, -1.5, 0.01),
+      ]),
+      lineMat(0.28, 0xa24b2a)
+    );
+    group.add(docEdge);
+
+    // Text lines
+    [-1.0, -0.65, -0.3, 0.05, 0.4].forEach((y, i) => {
+      const w = 1.4 - (i % 2) * 0.2;
+      group.add(new THREE.Line(
+        new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-w/2, y, 0.02), new THREE.Vector3(w/2, y, 0.02)]),
+        lineMat(0.09, 0xf0e8d0)
+      ));
+    });
+
+    // Signature curve (bottom right)
+    const sigPts = [];
+    for (let t = 0; t <= 1; t += 0.04) {
+      const x = 0.1 + t * 0.75;
+      const y = -1.05 + Math.sin(t * Math.PI * 2.5) * 0.18 - t * 0.1;
+      sigPts.push(new THREE.Vector3(x, y, 0.03));
+    }
+    group.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(sigPts), lineMat(0.55, 0xe8a838)));
+
+    // Underline below signature
+    group.add(new THREE.Line(
+      new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0.1, -1.22, 0.03), new THREE.Vector3(0.85, -1.22, 0.03)]),
+      lineMat(0.3, 0xa24b2a)
+    ));
+
+    const glow = createGlowSprite({ inner: "rgba(232,168,56,0.2)", middle: "rgba(162,75,42,0.07)", scale: 12 });
+    glow.position.copy(group.position);
+    scene.add(glow);
+
+    Object.assign(data, { group, glow });
+  },
+  frame({ camera, pointer, state, data }, elapsed) {
+    const { group, glow } = data;
+    if (!group) return;
+    camera.position.x = pointer.x * 0.35;
+    camera.position.y = -pointer.y * 0.25;
+    camera.lookAt(0, 0, -3);
+    group.rotation.y = Math.sin(elapsed * 0.28) * 0.06 + pointer.x * 0.04;
+    group.rotation.x = Math.sin(elapsed * 0.18) * 0.025;
+    group.position.y = 1.8 + Math.sin(elapsed * 0.55) * 0.1;
+    glow.position.copy(group.position);
+    glow.scale.setScalar(12 + state.energy * 1.5 + state.success * 1.8);
+    glow.material.opacity = 0.34 + state.energy * 0.2;
+  }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,24 @@
+.git
+.gitignore
+.venv/
+.tmp/
+.playwright-mcp/
+.claude/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.png
+*.bat
+.env
+credentials.json
+token.json
+# Docs / planning — not needed at runtime
+docs/
+PLAN.md
+SAAS_PLAN.md
+QA_MANUAL.md
+README.md
+# Test files
+test_all_tools.py
+validate-docker.sh

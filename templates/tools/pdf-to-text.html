@@ -1,0 +1,133 @@
+﻿{% extends "base.html" %}
+{% block title %}PDF to Text{% endblock %}
+{% block content %}
+<canvas id="pdf-to-text-scene" data-tool-scene aria-hidden="true"></canvas>
+<div class="tool-scene-vignette tool-scene-vignette--left" aria-hidden="true"></div>
+
+<section class="hero hero--tool">
+  <a class="back-link" href="/">
+    <svg viewBox="0 0 16 16" fill="none" style="width:14px;height:14px;vertical-align:-.15em"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    All tools
+  </a>
+  <p class="eyebrow">Convert documents</p>
+  <h1>Extract PDF content into <span class="highlight">plain editable text.</span></h1>
+  <p class="lede">Pull readable text out of any PDF — including scans — into a clean <code>.txt</code> file. Use the AI engine for better accuracy on complex layouts.</p>
+</section>
+
+<div class="tool-layout">
+  <section class="panel">
+    <form class="form" action="/convert/pdf-to-text" method="post" enctype="multipart/form-data">
+      <div class="form-cluster">
+        <div class="form-cluster__header">
+          <p class="eyebrow">Input</p>
+          <span>Upload a PDF to extract as plain text.</span>
+        </div>
+        <label class="upload upload--drop">
+          <input type="file" name="file" accept=".pdf" required>
+          <div class="upload-inner">
+            <svg class="upload-icon" viewBox="0 0 48 48" fill="none"><rect x="8" y="12" width="32" height="26" rx="4" fill="#a24b2a" opacity=".1"/><rect x="8" y="12" width="32" height="26" rx="4" stroke="#a24b2a" stroke-width="1.8"/><path d="M24 20v12M20 24l4-4 4 4" stroke="#a24b2a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <strong>Choose a PDF file or drag and drop</strong>
+            <span>Works on digital and scanned PDFs with the AI engine.</span>
+          </div>
+        </label>
+      </div>
+
+      <div class="form-cluster">
+        <div class="form-cluster__header">
+          <p class="eyebrow">Engine</p>
+          <span>Choose how text is extracted from each page.</span>
+        </div>
+        <label class="field">
+          <span>Extraction engine</span>
+          <select name="engine">
+            <option value="auto">auto — AI first, basic fallback</option>
+            <option value="ollama">ollama (Gemma 4) — AI only</option>
+            <option value="basic">basic — fast text extraction</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="action-strip">
+        <div class="action-strip__copy">
+          <strong>Ready to extract text?</strong>
+          <span>Each page is separated clearly in the output so long documents remain easy to inspect.</span>
+        </div>
+        <button type="submit">Extract and Download</button>
+      </div>
+    </form>
+  </section>
+
+  <aside class="tool-tips">
+    <div class="tool-tips__hero">
+      <p class="eyebrow">Workflow</p>
+      <h3>AI engine reads any PDF, including scans.</h3>
+      <p>Gemma 4 renders each page as an image and reads the text visually — the same way a person would — giving cleaner output on multi-column and scanned documents.</p>
+    </div>
+    <div class="tool-tip-pills">
+      <span>Research</span>
+      <span>Notes</span>
+      <span>Searchable</span>
+    </div>
+    <h3>Tips</h3>
+    <ul>
+      <li><strong>auto</strong> tries Ollama first and falls back silently to basic if unavailable.</li>
+      <li><strong>ollama</strong> uses Gemma 4 vision — works on scans, columns, and mixed layouts. Requires <code>ollama serve</code>.</li>
+      <li><strong>basic</strong> is instant but only works on text-embedded PDFs.</li>
+      <li>Each page is separated by a <code>--- Page N ---</code> marker in the output.</li>
+      <li>AI engine processes one page at a time — allow ~30–60 sec per page.</li>
+    </ul>
+  </aside>
+</div>
+<script type="module">
+import { THREE, createGlowSprite, mountToolScene } from "/static/tool-scene.js";
+
+mountToolScene({
+  canvasId: "pdf-to-text-scene",
+  setup({ scene, data }) {
+    const group = new THREE.Group();
+    group.position.set(-5.1, 1.5, -6.4);
+    scene.add(group);
+
+    const mat = (opacity, color) => new THREE.LineBasicMaterial({ color, transparent: true, opacity });
+
+    // Horizontal text lines of varying widths â€” like a text document
+    const lines = [];
+    const lineWidths = [3.2, 2.4, 3.0, 1.8, 2.8, 2.2, 3.1, 1.6];
+    lineWidths.forEach((w, i) => {
+      const y = 2.0 - i * 0.56;
+      const line = new THREE.Line(
+        new THREE.BufferGeometry().setFromPoints([
+          new THREE.Vector3(-w / 2, y, 0),
+          new THREE.Vector3(w / 2, y, 0)
+        ]),
+        mat(0.1 + (i % 3) * 0.04, i % 4 === 0 ? 0xe8a838 : 0xf0c060)
+      );
+      lines.push({ line, y, w });
+      group.add(line);
+    });
+
+    const glow = createGlowSprite({ inner: "rgba(232,168,56,0.16)", middle: "rgba(212,74,26,0.06)", scale: 10 });
+    glow.position.copy(group.position);
+    scene.add(glow);
+
+    Object.assign(data, { group, lines, glow });
+  },
+  frame({ camera, pointer, state, data }, elapsed) {
+    const { group, lines, glow } = data;
+    if (!group) return;
+    camera.position.x = pointer.x * 0.35;
+    camera.position.y = -pointer.y * 0.25;
+    camera.lookAt(0, 0, -3);
+    lines.forEach(({ line, y }, i) => {
+      line.position.y = Math.sin(elapsed * 0.4 + i * 0.6) * (0.04 + state.energy * 0.06);
+    });
+    group.rotation.y = Math.sin(elapsed * 0.26) * 0.07;
+    group.position.y = 1.5 + Math.sin(elapsed * 0.58) * 0.1;
+    glow.position.copy(group.position);
+    glow.scale.setScalar(10 + state.energy * 1.2);
+    glow.material.opacity = 0.3 + state.energy * 0.15;
+  }
+});
+</script>
+{% endblock %}
+

@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+{% block title %}PDF to PDF/A{% endblock %}
+{% block content %}
+<canvas id="pdf-to-pdfa-scene" data-tool-scene aria-hidden="true"></canvas>
+<div class="tool-scene-vignette tool-scene-vignette--right" aria-hidden="true"></div>
+
+<section class="hero hero--tool">
+  <a class="back-link" href="/">
+    <svg viewBox="0 0 16 16" fill="none" style="width:14px;height:14px;vertical-align:-.15em"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    All tools
+  </a>
+  <p class="eyebrow">Convert documents</p>
+  <h1>Archive PDFs in the <span class="highlight">PDF/A standard.</span></h1>
+  <p class="lede">Convert a regular PDF to PDF/A-1b for long-term archiving — the format used by institutions, legal archives, and document management systems.</p>
+</section>
+
+<div class="tool-layout">
+  <section class="panel">
+    <form class="form" action="/convert/pdf-to-pdfa" method="post" enctype="multipart/form-data">
+      <div class="form-cluster">
+        <div class="form-cluster__header">
+          <p class="eyebrow">Input</p>
+          <span>Upload a standard PDF to convert to the PDF/A-1b archival format.</span>
+        </div>
+        <label class="upload upload--drop">
+          <input type="file" name="file" accept=".pdf" required>
+          <div class="upload-inner">
+            <svg class="upload-icon" viewBox="0 0 48 48" fill="none"><rect x="8" y="12" width="32" height="26" rx="4" fill="#a24b2a" opacity=".1"/><rect x="8" y="12" width="32" height="26" rx="4" stroke="#a24b2a" stroke-width="1.8"/><path d="M24 20v12M20 24l4-4 4 4" stroke="#a24b2a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <strong>Choose a PDF or drag and drop</strong>
+            <span>All content is preserved — only archival metadata is added.</span>
+          </div>
+        </label>
+      </div>
+
+      <div class="action-strip">
+        <div class="action-strip__copy">
+          <strong>Ready to archive?</strong>
+          <span>The output will include PDF/A-1b XMP metadata required by most archival workflows.</span>
+        </div>
+        <button type="submit">Convert and Download</button>
+      </div>
+    </form>
+  </section>
+
+  <aside class="tool-tips">
+    <div class="tool-tips__hero">
+      <p class="eyebrow">Workflow</p>
+      <h3>Best for legal, institutional, and long-term storage.</h3>
+      <p>PDF/A is the ISO standard for archiving documents. Many government systems and document management platforms require it.</p>
+    </div>
+    <div class="tool-tip-pills">
+      <span>Legal docs</span>
+      <span>Archives</span>
+      <span>Compliance</span>
+    </div>
+    <h3>Tips</h3>
+    <ul>
+      <li>This tool adds PDF/A-1b XMP metadata to mark the document as archival-compliant.</li>
+      <li>For strict ISO 19005 compliance (embedded fonts, color profiles), a more specialised tool like Ghostscript is needed.</li>
+      <li>Most document management systems accept this output as a valid PDF/A document.</li>
+      <li>The original content, structure, and page count are unchanged.</li>
+    </ul>
+  </aside>
+</div>
+
+<script type="module">
+import { THREE, createGlowSprite, mountToolScene } from "/static/tool-scene.js";
+
+mountToolScene({
+  canvasId: "pdf-to-pdfa-scene",
+  setup({ scene, data }) {
+    const group = new THREE.Group();
+    group.position.set(5.1, 1.8, -6.4);
+    scene.add(group);
+
+    const mat = (opacity, color) => new THREE.LineBasicMaterial({ color, transparent: true, opacity });
+
+    // Source PDF document
+    const srcDoc = new THREE.Group();
+    srcDoc.position.set(-1.6, 0, 0);
+    const srcBorder = [[-1.2, 1.8], [1.2, 1.8], [1.2, -1.8], [-1.2, -1.8], [-1.2, 1.8]]
+      .map(([x, y]) => new THREE.Vector3(x, y, 0));
+    srcDoc.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(srcBorder), mat(0.14, 0xf0ece4)));
+    [1.2, 0.65, 0.2, -0.3, -0.8, -1.2].forEach((y, i) => {
+      const w = i % 3 === 2 ? 1.5 : 1.9;
+      srcDoc.add(new THREE.Line(
+        new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-w / 2, y, 0.01), new THREE.Vector3(w / 2, y, 0.01)]),
+        mat(0.09, 0xf0c060)
+      ));
+    });
+    group.add(srcDoc);
+
+    // Arrow
+    const arrowPts = [
+      new THREE.Vector3(-0.5, 0, 0), new THREE.Vector3(0.5, 0, 0),
+      new THREE.Vector3(0.2, 0.25, 0), new THREE.Vector3(0.5, 0, 0),
+      new THREE.Vector3(0.2, -0.25, 0),
+    ];
+    group.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(arrowPts), mat(0.18, 0xe8a838)));
+
+    // Target PDF/A document with archive badge
+    const tgtDoc = new THREE.Group();
+    tgtDoc.position.set(1.6, 0, 0);
+    const tgtBorder = [[-1.2, 1.8], [1.2, 1.8], [1.2, -1.8], [-1.2, -1.8], [-1.2, 1.8]]
+      .map(([x, y]) => new THREE.Vector3(x, y, 0));
+    tgtDoc.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(tgtBorder), mat(0.22, 0xe8a838)));
+
+    // Archive seal (circle with "A")
+    const sealPts = Array.from({ length: 48 }, (_, i) => {
+      const a = (i / 48) * Math.PI * 2;
+      return new THREE.Vector3(Math.cos(a) * 0.55, Math.sin(a) * 0.55, 0.02);
+    });
+    tgtDoc.add(new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints(sealPts), mat(0.22, 0xe8a838)));
+
+    // Inner seal ring
+    const innerSealPts = Array.from({ length: 48 }, (_, i) => {
+      const a = (i / 48) * Math.PI * 2;
+      return new THREE.Vector3(Math.cos(a) * 0.42, Math.sin(a) * 0.42, 0.03);
+    });
+    tgtDoc.add(new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints(innerSealPts), mat(0.14, 0xf0c060)));
+    group.add(tgtDoc);
+
+    const glow = createGlowSprite({ inner: "rgba(232,168,56,0.22)", middle: "rgba(212,74,26,0.09)", scale: 12 });
+    glow.position.copy(group.position);
+    scene.add(glow);
+
+    Object.assign(data, { group, glow, tgtDoc });
+  },
+  frame({ camera, pointer, state, data }, elapsed) {
+    const { group, glow } = data;
+    if (!group) return;
+    camera.position.x = pointer.x * 0.35;
+    camera.position.y = -pointer.y * 0.25;
+    camera.lookAt(0, 0, -3);
+    group.rotation.y = Math.sin(elapsed * 0.28) * 0.08 + pointer.x * 0.04;
+    group.rotation.x = Math.sin(elapsed * 0.18) * 0.04;
+    group.position.y = 1.8 + Math.sin(elapsed * 0.6) * 0.1;
+    glow.position.copy(group.position);
+    glow.scale.setScalar(12 + state.energy * 1.5 + state.success * 1.6);
+    glow.material.opacity = 0.34 + state.energy * 0.18;
+  }
+});
+</script>
+{% endblock %}

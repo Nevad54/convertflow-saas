@@ -1,0 +1,122 @@
+﻿{% extends "base.html" %}
+{% block title %}Remove Pages{% endblock %}
+{% block content %}
+<canvas id="remove-pages-scene" data-tool-scene aria-hidden="true"></canvas>
+<div class="tool-scene-vignette tool-scene-vignette--left" aria-hidden="true"></div>
+
+<section class="hero hero--tool">
+  <a class="back-link" href="/">
+    <svg viewBox="0 0 16 16" fill="none" style="width:14px;height:14px;vertical-align:-.15em"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    All tools
+  </a>
+  <p class="eyebrow">Prepare PDFs</p>
+  <h1>Remove the pages you <span class="highlight">do not want</span>.</h1>
+  <p class="lede">Delete specific pages from a PDF and export a cleaner version without rebuilding the whole document by hand.</p>
+</section>
+
+<div class="tool-layout">
+  <section class="panel">
+    <form class="form" action="/convert/remove-pages" method="post" enctype="multipart/form-data">
+      <div class="form-cluster">
+        <div class="form-cluster__header">
+          <p class="eyebrow">Input</p>
+          <span>Upload the PDF and tell us which pages to drop.</span>
+        </div>
+        <label class="upload upload--drop">
+          <input type="file" name="file" accept=".pdf" required>
+          <div class="upload-inner">
+            <svg class="upload-icon" viewBox="0 0 48 48" fill="none"><rect x="8" y="12" width="32" height="26" rx="4" fill="#a24b2a" opacity=".1"/><rect x="8" y="12" width="32" height="26" rx="4" stroke="#a24b2a" stroke-width="1.8"/><path d="M24 20v12M20 24l4-4 4 4" stroke="#a24b2a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <strong>Choose a PDF file or drag &amp; drop</strong>
+          </div>
+        </label>
+        <label class="field">
+          <span>Pages to remove</span>
+          <input type="text" name="pages" placeholder="e.g. 2, 4, 6-9" required>
+          <small class="hint">Comma-separated numbers and ranges like <code>2,4,6-9</code></small>
+        </label>
+      </div>
+      <div class="action-strip">
+        <div class="action-strip__copy">
+          <strong>Ready to remove pages</strong>
+          <span>We'll keep all other pages in order and export a cleaner PDF automatically.</span>
+        </div>
+        <button type="submit">Remove &amp; Download</button>
+      </div>
+    </form>
+  </section>
+  <aside class="tool-tips">
+    <div class="tool-tips__hero">
+      <p class="eyebrow">Workflow</p>
+      <h3>Best for trimming covers, blanks, appendices, or extra inserts.</h3>
+      <p>Use this when most of the document stays intact and you only want to remove a few unwanted pages.</p>
+    </div>
+    <div class="tool-tip-pills">
+      <span>Trim files</span>
+      <span>Delete inserts</span>
+      <span>Remove blanks</span>
+      <span>Cleanup</span>
+    </div>
+    <h3>Tips</h3>
+    <ul>
+      <li>All other pages are kept in their original order.</li>
+      <li>To keep specific pages instead, use <a href="/tool/extract-pages">Extract Pages</a>.</li>
+    </ul>
+  </aside>
+</div>
+<script type="module">
+import { THREE, createGlowSprite, mountToolScene } from "/static/tool-scene.js";
+
+mountToolScene({
+  canvasId: "remove-pages-scene",
+  setup({ scene, data }) {
+    const group = new THREE.Group();
+    group.position.set(-5.0, 1.7, -6.2);
+    scene.add(group);
+
+    const pages = [];
+    [0, 1, 2, 3, 4].forEach((i) => {
+      const isRemoved = i === 1;
+      const mesh = new THREE.Mesh(
+        new THREE.PlaneGeometry(3.0, 4.0),
+        new THREE.MeshBasicMaterial({
+          color: isRemoved ? 0xd44a1a : 0xf0ece4,
+          transparent: true,
+          opacity: isRemoved ? 0.14 : 0.09,
+          side: THREE.DoubleSide
+        })
+      );
+      mesh.position.set(i * 0.24 - 0.48, i * 0.1 - 0.2, i * -0.1);
+      mesh.rotation.z = (i - 2) * 0.03;
+      pages.push({ mesh, isRemoved, baseX: i * 0.24 - 0.48 });
+      group.add(mesh);
+    });
+
+    const glow = createGlowSprite({ inner: "rgba(212,74,26,0.15)", middle: "rgba(162,75,42,0.06)", scale: 10 });
+    glow.position.copy(group.position);
+    scene.add(glow);
+
+    Object.assign(data, { group, pages, glow });
+  },
+  frame({ camera, pointer, state, data }, elapsed) {
+    const { group, pages, glow } = data;
+    if (!group) return;
+    camera.position.x = pointer.x * 0.35;
+    camera.position.y = -pointer.y * 0.25;
+    camera.lookAt(0, 0, -3);
+    const drift = Math.sin(elapsed * 0.85) * 0.18 + state.energy * 0.35;
+    pages.forEach(({ mesh, isRemoved, baseX }) => {
+      if (isRemoved) {
+        mesh.position.x = baseX - drift;
+        mesh.material.opacity = Math.max(0.02, 0.14 - state.energy * 0.08);
+      }
+    });
+    group.rotation.y = Math.sin(elapsed * 0.3) * 0.07;
+    group.position.y = 1.7 + Math.sin(elapsed * 0.62) * 0.1;
+    glow.position.copy(group.position);
+    glow.scale.setScalar(10 + state.energy * 1.1);
+    glow.material.opacity = 0.28 + state.energy * 0.14;
+  }
+});
+</script>
+{% endblock %}
+

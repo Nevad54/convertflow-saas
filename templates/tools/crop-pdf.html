@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+{% block title %}Crop PDF{% endblock %}
+{% block content %}
+<canvas id="crop-pdf-scene" data-tool-scene aria-hidden="true"></canvas>
+<div class="tool-scene-vignette tool-scene-vignette--right" aria-hidden="true"></div>
+
+<section class="hero hero--tool">
+  <a class="back-link" href="/">
+    <svg viewBox="0 0 16 16" fill="none" style="width:14px;height:14px;vertical-align:-.15em"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    All tools
+  </a>
+  <p class="eyebrow">Review and finalize</p>
+  <h1>Trim the margins on <span class="highlight">every page.</span></h1>
+  <p class="lede">Enter how much to crop from each side in millimeters and download a tighter, cleaner version of your PDF.</p>
+</section>
+
+<div class="tool-layout">
+  <section class="panel">
+    <form class="form" action="/convert/crop-pdf" method="post" enctype="multipart/form-data">
+      <div class="form-cluster">
+        <div class="form-cluster__header">
+          <p class="eyebrow">Input</p>
+          <span>Upload a PDF file to crop.</span>
+        </div>
+        <label class="upload upload--drop">
+          <input type="file" name="file" accept=".pdf" required>
+          <div class="upload-inner">
+            <svg class="upload-icon" viewBox="0 0 48 48" fill="none"><rect x="8" y="12" width="32" height="26" rx="4" fill="#a24b2a" opacity=".1"/><rect x="8" y="12" width="32" height="26" rx="4" stroke="#a24b2a" stroke-width="1.8"/><path d="M24 20v12M20 24l4-4 4 4" stroke="#a24b2a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <strong>Choose a PDF or drag and drop</strong>
+            <span>All pages will be cropped by the same margins.</span>
+          </div>
+        </label>
+      </div>
+
+      <div class="form-cluster">
+        <div class="form-cluster__header">
+          <p class="eyebrow">Crop margins</p>
+          <span>Enter how much to trim from each side in millimeters. Leave at 0 to keep that side unchanged.</span>
+        </div>
+        <div class="field-row">
+          <label class="field">
+            <span>Left (mm)</span>
+            <input type="number" name="left_mm" value="0" min="0" max="200" step="0.5">
+          </label>
+          <label class="field">
+            <span>Top (mm)</span>
+            <input type="number" name="top_mm" value="0" min="0" max="200" step="0.5">
+          </label>
+          <label class="field">
+            <span>Right (mm)</span>
+            <input type="number" name="right_mm" value="0" min="0" max="200" step="0.5">
+          </label>
+          <label class="field">
+            <span>Bottom (mm)</span>
+            <input type="number" name="bottom_mm" value="0" min="0" max="200" step="0.5">
+          </label>
+        </div>
+      </div>
+
+      <div class="action-strip">
+        <div class="action-strip__copy">
+          <strong>Ready to crop?</strong>
+          <span>The crop is applied to all pages using the PDF cropbox — no content is permanently deleted.</span>
+        </div>
+        <button type="submit">Crop and Download</button>
+      </div>
+    </form>
+  </section>
+
+  <aside class="tool-tips">
+    <div class="tool-tips__hero">
+      <p class="eyebrow">Workflow</p>
+      <h3>Remove unwanted white space or oversized margins.</h3>
+      <p>Use this to tighten up scanned documents, remove scanner borders, or fit content better on screen.</p>
+    </div>
+    <div class="tool-tip-pills">
+      <span>Scans</span>
+      <span>Margins</span>
+      <span>Layout</span>
+    </div>
+    <h3>Tips</h3>
+    <ul>
+      <li>Cropping uses the PDF <em>cropbox</em> — the underlying content is preserved, just hidden. Some viewers may still show the original page size.</li>
+      <li>A4 pages are 210 × 297 mm. Typical scanners add 5–15 mm of border around the content.</li>
+      <li>Start with equal values on all sides (e.g. 10 mm) to remove symmetric borders.</li>
+      <li>If the margin total exceeds the page size, the crop will be rejected with an error.</li>
+    </ul>
+  </aside>
+</div>
+
+<script type="module">
+import { THREE, createGlowSprite, mountToolScene } from "/static/tool-scene.js";
+
+mountToolScene({
+  canvasId: "crop-pdf-scene",
+  setup({ scene, data }) {
+    const group = new THREE.Group();
+    group.position.set(5.1, 1.8, -6.4);
+    scene.add(group);
+
+    const mat = (opacity, color) => new THREE.LineBasicMaterial({ color, transparent: true, opacity });
+
+    // Outer (full) page
+    const outer = [[-1.5, 2.1], [1.5, 2.1], [1.5, -2.1], [-1.5, -2.1], [-1.5, 2.1]]
+      .map(([x, y]) => new THREE.Vector3(x, y, 0));
+    group.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(outer), mat(0.12, 0xf0ece4)));
+
+    // Dashed crop marks at corners
+    const dash = (pts) => {
+      const line = new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts.map(([x,y]) => new THREE.Vector3(x, y, 0.01))), mat(0.2, 0xe8a838));
+      group.add(line);
+    };
+    // corner ticks
+    [[-1.5, 2.1], [1.5, 2.1], [1.5, -2.1], [-1.5, -2.1]].forEach(([cx, cy]) => {
+      const sx = Math.sign(cx), sy = Math.sign(cy);
+      dash([[cx, cy - sy * 0.35], [cx, cy - sy * 0.7]]);
+      dash([[cx - sx * 0.35, cy], [cx - sx * 0.7, cy]]);
+    });
+
+    // Inner cropped page
+    const inner = [[-1.1, 1.65], [1.1, 1.65], [1.1, -1.65], [-1.1, -1.65], [-1.1, 1.65]]
+      .map(([x, y]) => new THREE.Vector3(x, y, 0.02));
+    group.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(inner), mat(0.26, 0xe8a838)));
+
+    // Content lines inside
+    [1.1, 0.6, 0.1, -0.4, -0.9, -1.3].forEach((y, i) => {
+      const w = i % 3 === 2 ? 1.4 : 1.8;
+      group.add(new THREE.Line(
+        new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-w / 2, y, 0.04), new THREE.Vector3(w / 2, y, 0.04)]),
+        mat(0.1, 0xf0c060)
+      ));
+    });
+
+    const glow = createGlowSprite({ inner: "rgba(232,168,56,0.2)", middle: "rgba(212,74,26,0.08)", scale: 11 });
+    glow.position.copy(group.position);
+    scene.add(glow);
+
+    Object.assign(data, { group, glow });
+  },
+  frame({ camera, pointer, state, data }, elapsed) {
+    const { group, glow } = data;
+    if (!group) return;
+    camera.position.x = pointer.x * 0.35;
+    camera.position.y = -pointer.y * 0.25;
+    camera.lookAt(0, 0, -3);
+    group.rotation.y = Math.sin(elapsed * 0.3) * 0.08 + pointer.x * 0.04;
+    group.rotation.x = Math.sin(elapsed * 0.2) * 0.04;
+    group.position.y = 1.8 + Math.sin(elapsed * 0.65) * 0.1;
+    glow.position.copy(group.position);
+    glow.scale.setScalar(11 + state.energy * 1.4 + state.success * 1.5);
+    glow.material.opacity = 0.32 + state.energy * 0.18;
+  }
+});
+</script>
+{% endblock %}

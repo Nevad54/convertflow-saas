@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}Checkout Cancelled — ConvertFlow{% endblock %}
+{% block content %}
+<section class="billing-result-shell">
+
+  <div class="billing-result-card billing-result-card--cancel">
+    <div class="billing-result-card__icon" aria-hidden="true">
+      <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" width="64" height="64">
+        <circle cx="32" cy="32" r="32" fill="rgba(148,163,184,.1)"/>
+        <circle cx="32" cy="32" r="24" fill="rgba(148,163,184,.12)"/>
+        <path d="M32 20v14M32 38v4" stroke="rgba(148,163,184,.7)" stroke-width="3.5" stroke-linecap="round"/>
+      </svg>
+    </div>
+
+    <h1>Checkout cancelled</h1>
+    <p class="billing-result-card__sub">
+      No worries — you weren't charged. You can upgrade to Pro any time from your dashboard.
+    </p>
+
+    <div class="billing-result-card__actions">
+      <a href="/pricing" class="btn">View pricing</a>
+      <a href="/" class="btn-link">Back to tools</a>
+    </div>
+  </div>
+
+</section>
+
+<style>
+.billing-result-shell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  padding: 3rem 1.5rem;
+}
+
+.billing-result-card {
+  max-width: 440px;
+  width: 100%;
+  background: var(--surface, rgba(255,255,255,.04));
+  border: 1px solid var(--border, rgba(255,255,255,.1));
+  border-radius: 1.25rem;
+  padding: 2.5rem 2rem;
+  text-align: center;
+}
+
+.billing-result-card--cancel {
+  border-color: rgba(148,163,184,.2);
+}
+
+.billing-result-card__icon {
+  margin: 0 auto 1.5rem;
+  width: 64px;
+  height: 64px;
+}
+
+.billing-result-card h1 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin: 0 0 .75rem;
+}
+
+.billing-result-card__sub {
+  color: var(--text-secondary, #888);
+  font-size: .95rem;
+  line-height: 1.6;
+  margin: 0 0 2rem;
+}
+
+.billing-result-card__actions {
+  display: flex;
+  flex-direction: column;
+  gap: .75rem;
+  align-items: center;
+}
+
+.billing-result-card__actions .btn {
+  width: 100%;
+  justify-content: center;
+}
+</style>
+{% endblock %}

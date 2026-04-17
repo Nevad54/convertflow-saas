@@ -1,0 +1,26 @@
+fastapi
+uvicorn[standard]
+jinja2
+python-multipart
+python-dotenv
+pillow
+pytesseract
+openai
+httpx
+python-docx
+fpdf2
+openpyxl
+python-pptx
+pypdf
+pikepdf
+xhtml2pdf
+pymupdf
+pywin32; platform_system == "Windows"
+# Auth (Phase 4)
+python-jose[cryptography]
+passlib[bcrypt]
+bcrypt<5
+# Billing (Phase 5)
+stripe>=9,<10
+# Postgres (optional — only used when DATABASE_URL is set; see auth/models.py)
+psycopg[binary]>=3.1,<4

@@ -1,0 +1,195 @@
+{% extends "base.html" %}
+{% block title %}Translate PDF{% endblock %}
+{% block content %}
+<canvas id="translate-pdf-scene" data-tool-scene aria-hidden="true"></canvas>
+<div class="tool-scene-vignette tool-scene-vignette--right" aria-hidden="true"></div>
+
+<section class="hero hero--tool">
+  <a class="back-link" href="/">
+    <svg viewBox="0 0 16 16" fill="none" style="width:14px;height:14px;vertical-align:-.15em"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    All tools
+  </a>
+  <p class="eyebrow">Optional AI assist</p>
+  <h1>Translate PDFs into any language <span class="highlight">locally.</span></h1>
+  <p class="lede">Upload a PDF, pick a target language, and download the translated document — powered entirely by Gemma 4 on your device, no internet required.</p>
+</section>
+
+<div class="tool-layout">
+  <section class="panel">
+    <form class="form" action="/convert/translate-pdf" method="post" enctype="multipart/form-data">
+      <div class="form-cluster">
+        <div class="form-cluster__header">
+          <p class="eyebrow">Input</p>
+          <span>Upload the PDF you want translated.</span>
+        </div>
+        <label class="upload upload--drop">
+          <input type="file" name="file" accept=".pdf" required>
+          <div class="upload-inner">
+            <svg class="upload-icon" viewBox="0 0 48 48" fill="none"><rect x="8" y="12" width="32" height="26" rx="4" fill="#a24b2a" opacity=".1"/><rect x="8" y="12" width="32" height="26" rx="4" stroke="#a24b2a" stroke-width="1.8"/><path d="M24 20v12M20 24l4-4 4 4" stroke="#a24b2a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <strong>Choose a PDF or drag and drop</strong>
+            <span>Works on digital and scanned PDFs.</span>
+          </div>
+        </label>
+      </div>
+
+      <div class="form-cluster">
+        <div class="form-cluster__header">
+          <p class="eyebrow">Options</p>
+          <span>Choose language, engine, and output format.</span>
+        </div>
+        <label class="field">
+          <span>AI engine</span>
+          <select name="engine">
+            <option value="auto">auto — Ollama first, GitHub fallback</option>
+            <option value="ollama">ollama (Gemma 4) — local, works on scans</option>
+            <option value="github">github models — cloud, fast on text PDFs</option>
+            <option value="openai">openai — requires OPENAI_API_KEY</option>
+          </select>
+        </label>
+        <div class="field-row">
+          <label class="field">
+            <span>Target language</span>
+            <select name="language">
+              <option>Arabic</option>
+              <option>Chinese (Simplified)</option>
+              <option>Chinese (Traditional)</option>
+              <option>Dutch</option>
+              <option>Filipino</option>
+              <option>French</option>
+              <option>German</option>
+              <option>Hindi</option>
+              <option>Indonesian</option>
+              <option>Italian</option>
+              <option>Japanese</option>
+              <option>Korean</option>
+              <option>Malay</option>
+              <option>Polish</option>
+              <option>Portuguese</option>
+              <option>Russian</option>
+              <option selected>Spanish</option>
+              <option>Thai</option>
+              <option>Turkish</option>
+              <option>Ukrainian</option>
+              <option>Vietnamese</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>Output format</span>
+            <select name="output_format">
+              <option value="docx" selected>.docx — editable Word</option>
+              <option value="pdf">.pdf — fixed layout</option>
+            </select>
+          </label>
+        </div>
+      </div>
+
+      <div class="action-strip">
+        <div class="action-strip__copy">
+          <strong>Powered by Gemma 4 (local)</strong>
+          <span>Requires Ollama running with <code>gemma4:e4b</code> pulled. Allow ~30–60 sec per page.</span>
+        </div>
+        <button type="submit">Translate and Download</button>
+      </div>
+    </form>
+  </section>
+
+  <aside class="tool-tips">
+    <div class="tool-tips__hero">
+      <p class="eyebrow">Workflow</p>
+      <h3>Full document translation — completely offline.</h3>
+      <p>Gemma 4 reads each page visually and translates the content while preserving structure: headings stay as headings, lists stay as lists.</p>
+    </div>
+    <div class="tool-tip-pills">
+      <span>Legal docs</span>
+      <span>Reports</span>
+      <span>Contracts</span>
+      <span>Scanned pages</span>
+    </div>
+    <h3>Tips</h3>
+    <ul>
+      <li>Requires <code>ollama serve</code> running with <code>gemma4:e4b</code> pulled.</li>
+      <li>Works on scanned PDFs — Gemma 4 reads each page as an image.</li>
+      <li>Headings, bullets, and paragraphs are preserved in the output document.</li>
+      <li>Choose <code>.docx</code> if you want to edit the translation afterwards.</li>
+      <li>Choose <code>.pdf</code> for a fixed layout ready to share.</li>
+      <li>Allow ~30–60 seconds per page. A 5-page document takes roughly 3–5 minutes.</li>
+    </ul>
+  </aside>
+</div>
+
+<script type="module">
+import { THREE, createGlowSprite, mountToolScene } from "/static/tool-scene.js";
+
+mountToolScene({
+  canvasId: "translate-pdf-scene",
+  setup({ scene, data }) {
+    const group = new THREE.Group();
+    group.position.set(5.2, 1.6, -6.4);
+    scene.add(group);
+
+    const mat = (opacity, color) => new THREE.LineBasicMaterial({ color, transparent: true, opacity });
+
+    // Source doc (left)
+    const srcDoc = new THREE.Group();
+    srcDoc.position.set(-1.8, 0, 0);
+    const srcBorder = [[-1.1, 1.7],[1.1,1.7],[1.1,-1.7],[-1.1,-1.7],[-1.1,1.7]]
+      .map(([x,y]) => new THREE.Vector3(x,y,0));
+    srcDoc.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(srcBorder), mat(0.14, 0xf0ece4)));
+    [1.1,0.55,0.1,-0.35,-0.8,-1.2].forEach((y,i) => {
+      const w = i%3===2 ? 1.3 : 1.7;
+      srcDoc.add(new THREE.Line(
+        new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-w/2,y,0.01), new THREE.Vector3(w/2,y,0.01)]),
+        mat(0.09, 0xf0c060)
+      ));
+    });
+    group.add(srcDoc);
+
+    // Bidirectional arrows
+    const arrPts = [
+      new THREE.Vector3(-0.45, 0.18, 0), new THREE.Vector3(0.45, 0.18, 0),
+      new THREE.Vector3(0.18, 0.4, 0), new THREE.Vector3(0.45, 0.18, 0), new THREE.Vector3(0.18, -0.05, 0),
+    ];
+    group.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(arrPts), mat(0.2, 0xe8a838)));
+    const arrPts2 = [
+      new THREE.Vector3(0.45, -0.18, 0), new THREE.Vector3(-0.45, -0.18, 0),
+      new THREE.Vector3(-0.18, -0.4, 0), new THREE.Vector3(-0.45, -0.18, 0), new THREE.Vector3(-0.18, 0.05, 0),
+    ];
+    group.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(arrPts2), mat(0.14, 0x2dd4a8)));
+
+    // Target doc (right) — slightly different line pattern
+    const tgtDoc = new THREE.Group();
+    tgtDoc.position.set(1.8, 0, 0);
+    const tgtBorder = [[-1.1,1.7],[1.1,1.7],[1.1,-1.7],[-1.1,-1.7],[-1.1,1.7]]
+      .map(([x,y]) => new THREE.Vector3(x,y,0));
+    tgtDoc.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(tgtBorder), mat(0.2, 0xe8a838)));
+    [1.1,0.55,0.1,-0.35,-0.8,-1.2].forEach((y,i) => {
+      const w = i%3===2 ? 1.5 : 1.9;
+      tgtDoc.add(new THREE.Line(
+        new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-w/2,y,0.01), new THREE.Vector3(w/2,y,0.01)]),
+        mat(0.13, 0x2dd4a8)
+      ));
+    });
+    group.add(tgtDoc);
+
+    const glow = createGlowSprite({ inner: "rgba(45,212,168,0.2)", middle: "rgba(232,168,56,0.08)", scale: 12 });
+    glow.position.copy(group.position);
+    scene.add(glow);
+
+    Object.assign(data, { group, glow });
+  },
+  frame({ camera, pointer, state, data }, elapsed) {
+    const { group, glow } = data;
+    if (!group) return;
+    camera.position.x = pointer.x * 0.35;
+    camera.position.y = -pointer.y * 0.25;
+    camera.lookAt(0, 0, -3);
+    group.rotation.y = Math.sin(elapsed * 0.28) * 0.08 + pointer.x * 0.04;
+    group.rotation.x = Math.sin(elapsed * 0.18) * 0.03;
+    group.position.y = 1.6 + Math.sin(elapsed * 0.6) * 0.1;
+    glow.position.copy(group.position);
+    glow.scale.setScalar(12 + state.energy * 1.5 + state.success * 1.8);
+    glow.material.opacity = 0.34 + state.energy * 0.2;
+  }
+});
+</script>
+{% endblock %}

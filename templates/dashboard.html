@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — ConvertFlow{% endblock %}
+{% block content %}
+<section class="dash-shell">
+
+  <div class="dash-header">
+    <div>
+      <h1>Dashboard</h1>
+      <p class="dash-email">{{ user.email }}</p>
+    </div>
+    <span class="plan-badge plan-badge--{{ user.plan }}">{{ user.plan | capitalize }} plan</span>
+  </div>
+
+  {% if user.plan == "free" %}
+  <div class="dash-quota-card">
+    <div class="dash-quota-card__top">
+      <strong>Conversions today</strong>
+      <span class="dash-quota-card__count">{{ today_count }} / {{ limit }}</span>
+    </div>
+    <div class="dash-quota-bar" role="progressbar"
+         aria-valuenow="{{ today_count }}" aria-valuemin="0" aria-valuemax="{{ limit }}">
+      <div class="dash-quota-bar__fill"
+           style="width: {{ [((today_count / limit) * 100)|int, 100]|min }}%"
+           data-urgent="{{ 'true' if today_count >= limit else 'false' }}"></div>
+    </div>
+    <p class="dash-quota-card__sub">
+      {% if today_count >= limit %}
+        You've reached today's limit. Resets at midnight UTC.
+      {% else %}
+        {{ limit - today_count }} conversion{{ 's' if (limit - today_count) != 1 else '' }} remaining today. Resets at midnight UTC.
+      {% endif %}
+    </p>
+  </div>
+
+  <div class="dash-upgrade-card">
+    <div class="dash-upgrade-card__copy">
+      <strong>Upgrade to Pro</strong>
+      <p>Unlimited conversions, every day. All 30 tools, all AI engines, no daily cap.</p>
+      <ul class="dash-upgrade-card__perks">
+        <li>Unlimited conversions</li>
+        <li>Full AI-engine access (OCR, summarise, translate)</li>
+        <li>Priority processing queue</li>
+        <li>$12 / month — cancel any time</li>
+      </ul>
+    </div>
+    <a href="/billing/checkout" class="btn dash-upgrade-card__cta">Upgrade to Pro</a>
+  </div>
+
+  {% else %}
+  <div class="dash-pro-card">
+    <div class="dash-pro-badge">
+      <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="22" height="22">
+        <path d="M10 2l2.4 4.9 5.4.8-3.9 3.8.9 5.3L10 14.2l-4.8 2.6.9-5.3L2.2 7.7l5.4-.8L10 2z"
+              fill="currentColor" stroke="currentColor" stroke-width="0.5"/>
+      </svg>
+      Pro plan active
+    </div>
+    <p>Unlimited conversions — no daily cap.</p>
+    <a href="/billing/portal" class="btn-link">Manage subscription</a>
+  </div>
+  {% endif %}
+
+  <div class="dash-tools-link">
+    <a href="/" class="btn-ghost">&larr; Back to tools</a>
+  </div>
+
+</section>
+{% endblock %}

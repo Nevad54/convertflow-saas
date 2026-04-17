@@ -1,0 +1,419 @@
+{% extends "base.html" %}
+{% block title %}Organize PDF{% endblock %}
+{% block content %}
+<canvas id="organize-pdf-scene" data-tool-scene aria-hidden="true"></canvas>
+<div class="tool-scene-vignette tool-scene-vignette--right" aria-hidden="true"></div>
+
+<section class="hero hero--tool">
+  <a class="back-link" href="/">
+    <svg viewBox="0 0 16 16" fill="none" style="width:14px;height:14px;vertical-align:-.15em"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    All tools
+  </a>
+  <p class="eyebrow">Prepare PDFs</p>
+  <h1>Reorder pages by <span class="highlight">dragging and dropping.</span></h1>
+  <p class="lede">Upload a PDF, drag its page thumbnails into the order you want, then download the rearranged file — all without leaving your machine.</p>
+</section>
+
+<div class="tool-layout">
+  <section class="panel" id="organize-panel">
+
+    <!-- Step 1: Upload -->
+    <div id="step-upload">
+      <div class="form-cluster">
+        <div class="form-cluster__header">
+          <p class="eyebrow">Step 1 — Upload</p>
+          <span>Choose the PDF whose pages you want to reorder.</span>
+        </div>
+        <label class="upload upload--drop" id="org-drop-zone">
+          <input type="file" id="org-file-input" accept=".pdf">
+          <div class="upload-inner">
+            <svg class="upload-icon" viewBox="0 0 48 48" fill="none"><rect x="8" y="12" width="32" height="26" rx="4" fill="#a24b2a" opacity=".1"/><rect x="8" y="12" width="32" height="26" rx="4" stroke="#a24b2a" stroke-width="1.8"/><path d="M24 20v12M20 24l4-4 4 4" stroke="#a24b2a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <strong id="org-upload-label">Choose a PDF file or drag and drop</strong>
+          </div>
+        </label>
+      </div>
+      <div class="action-strip" style="margin-top:0">
+        <div class="action-strip__copy">
+          <strong>Load the page thumbnails</strong>
+          <span>Pages render at low resolution for fast display — the full PDF is preserved for output.</span>
+        </div>
+        <button type="button" id="org-load-btn" disabled>Load Pages</button>
+      </div>
+      <div id="org-progress" style="display:none;margin-top:14px">
+        <div class="progress-bar-bg" aria-hidden="true"><div class="progress-bar-fill" id="org-progress-fill" style="width:0%"></div></div>
+        <div class="progress-info"><span class="label" id="org-progress-label">Loading pages…</span></div>
+      </div>
+    </div>
+
+    <!-- Step 2: Reorder grid (hidden until pages load) -->
+    <div id="step-reorder" style="display:none">
+      <div class="form-cluster__header" style="margin-bottom:14px">
+        <p class="eyebrow">Step 2 — Reorder</p>
+        <span>Drag pages into the order you want. Numbers update automatically.</span>
+      </div>
+      <div id="thumb-grid" class="org-grid"></div>
+      <div class="action-strip" style="margin-top:18px">
+        <div class="action-strip__copy">
+          <strong id="org-summary">Ready to download</strong>
+          <span>The page order shown above will be applied to the output PDF.</span>
+        </div>
+        <button type="button" id="org-download-btn">Download Reordered PDF</button>
+      </div>
+      <div id="org-dl-progress" style="display:none;margin-top:14px">
+        <div class="progress-bar-bg" aria-hidden="true"><div class="progress-bar-fill" id="org-dl-fill" style="width:0%"></div></div>
+        <div class="progress-info"><span class="label" id="org-dl-label">Building PDF…</span></div>
+      </div>
+    </div>
+
+  </section>
+
+  <aside class="tool-tips">
+    <div class="tool-tips__hero">
+      <p class="eyebrow">How it works</p>
+      <h3>Visual drag-and-drop page management.</h3>
+      <p>Pages are rendered as thumbnails so you can see exactly what each page contains before reordering. Drag any thumbnail to a new position, then download.</p>
+    </div>
+    <div class="tool-tip-pills">
+      <span>Reorder</span>
+      <span>Rearrange chapters</span>
+      <span>Move cover pages</span>
+      <span>Resequence</span>
+    </div>
+    <h3>Tips</h3>
+    <ul>
+      <li>Drag a page thumbnail and drop it between other pages to reorder.</li>
+      <li>Page labels below each thumbnail always reflect the current position.</li>
+      <li>You can also duplicate a page — just note this tool reorders existing pages only.</li>
+      <li>Combine with <a href="/tool/remove-pages">Remove Pages</a> to delete unwanted pages first.</li>
+      <li>Works on PDFs of any size — thumbnails are generated at 72 DPI for speed.</li>
+    </ul>
+  </aside>
+</div>
+
+<style>
+.org-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 12px;
+  padding: 4px 0;
+}
+.org-thumb {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  background: var(--bg-raised);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 8px 6px 6px;
+  cursor: grab;
+  transition: border-color .18s, box-shadow .18s, transform .12s, opacity .18s;
+  user-select: none;
+  position: relative;
+}
+.org-thumb:hover { border-color: var(--border-hov); box-shadow: var(--shadow-sm); }
+.org-thumb.is-dragging { opacity: .35; cursor: grabbing; }
+.org-thumb.drag-target { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-glow); transform: scale(1.03); }
+.org-thumb img { width: 100%; height: auto; border-radius: 3px; display: block; pointer-events: none; }
+.org-thumb .pg-label {
+  font-size: 11px;
+  color: var(--fg-muted);
+  font-weight: 600;
+  letter-spacing: .04em;
+}
+.org-thumb .pg-orig {
+  font-size: 10px;
+  color: var(--fg-subtle);
+}
+</style>
+
+<script>
+(function () {
+  const fileInput = document.getElementById('org-file-input');
+  const dropZone  = document.getElementById('org-drop-zone');
+  const loadBtn   = document.getElementById('org-load-btn');
+  const uploadLabel = document.getElementById('org-upload-label');
+  const stepUpload  = document.getElementById('step-upload');
+  const stepReorder = document.getElementById('step-reorder');
+  const grid        = document.getElementById('thumb-grid');
+  const orgSummary  = document.getElementById('org-summary');
+  const dlBtn       = document.getElementById('org-download-btn');
+  const progress    = document.getElementById('org-progress');
+  const progressFill = document.getElementById('org-progress-fill');
+  const progressLabel = document.getElementById('org-progress-label');
+  const dlProgress  = document.getElementById('org-dl-progress');
+  const dlFill      = document.getElementById('org-dl-fill');
+  const dlLabel     = document.getElementById('org-dl-label');
+
+  let batchId = null;
+  let dragSrc = null;
+
+  // File selection
+  fileInput.addEventListener('change', () => {
+    const f = fileInput.files[0];
+    if (f) {
+      uploadLabel.textContent = f.name;
+      dropZone.classList.add('has-file');
+      loadBtn.disabled = false;
+    }
+  });
+
+  // Drag-over file drop zone
+  ['dragenter','dragover'].forEach(ev => dropZone.addEventListener(ev, e => { e.preventDefault(); dropZone.classList.add('drag-over'); }));
+  ['dragleave','dragend'].forEach(ev => dropZone.addEventListener(ev, e => {
+    if (!e.relatedTarget || !dropZone.contains(e.relatedTarget)) dropZone.classList.remove('drag-over');
+  }));
+  dropZone.addEventListener('drop', e => {
+    e.preventDefault();
+    dropZone.classList.remove('drag-over');
+    const files = e.dataTransfer && e.dataTransfer.files;
+    if (files && files[0]) {
+      fileInput.files = files;
+      uploadLabel.textContent = files[0].name;
+      dropZone.classList.add('has-file');
+      loadBtn.disabled = false;
+    }
+  });
+
+  // Load pages
+  loadBtn.addEventListener('click', async () => {
+    const file = fileInput.files[0];
+    if (!file) return;
+
+    loadBtn.disabled = true;
+    progress.style.display = 'block';
+    progressFill.style.width = '10%';
+    progressLabel.textContent = 'Uploading PDF…';
+
+    const fd = new FormData();
+    fd.append('file', file);
+
+    let pct = 10;
+    const ticker = setInterval(() => {
+      pct = Math.min(pct + 8, 88);
+      progressFill.style.width = pct + '%';
+      progressLabel.textContent = pct < 40 ? 'Uploading PDF…' : 'Rendering thumbnails…';
+    }, 300);
+
+    try {
+      const res = await fetch('/convert/organize-pdf/upload', { method: 'POST', body: fd });
+      clearInterval(ticker);
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ detail: 'Upload failed.' }));
+        throw new Error(err.detail || 'Upload failed.');
+      }
+      const data = await res.json();
+      batchId = data.batch_id;
+      progressFill.style.width = '100%';
+      progressLabel.textContent = 'Pages loaded!';
+
+      buildGrid(data.pages);
+      setTimeout(() => {
+        progress.style.display = 'none';
+        stepUpload.style.display = 'none';
+        stepReorder.style.display = 'block';
+      }, 400);
+    } catch (err) {
+      clearInterval(ticker);
+      progressFill.style.width = '100%';
+      progressLabel.textContent = 'Error: ' + err.message;
+      loadBtn.disabled = false;
+    }
+  });
+
+  // Build sortable thumbnail grid
+  function buildGrid(pages) {
+    grid.innerHTML = '';
+    pages.forEach((p, pos) => {
+      grid.appendChild(makeThumb(p.index, pos + 1, p.thumb));
+    });
+    updateLabels();
+  }
+
+  function makeThumb(origIndex, pos, thumbSrc) {
+    const div = document.createElement('div');
+    div.className = 'org-thumb';
+    div.draggable = true;
+    div.dataset.orig = origIndex;
+
+    const img = document.createElement('img');
+    img.src = thumbSrc;
+    img.alt = `Page ${pos}`;
+
+    const label = document.createElement('span');
+    label.className = 'pg-label';
+    label.textContent = `Page ${pos}`;
+
+    const orig = document.createElement('span');
+    orig.className = 'pg-orig';
+    orig.textContent = `(orig. ${origIndex + 1})`;
+
+    div.appendChild(img);
+    div.appendChild(label);
+    div.appendChild(orig);
+
+    // Drag events
+    div.addEventListener('dragstart', e => {
+      dragSrc = div;
+      div.classList.add('is-dragging');
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    div.addEventListener('dragend', () => {
+      div.classList.remove('is-dragging');
+      grid.querySelectorAll('.org-thumb').forEach(t => t.classList.remove('drag-target'));
+      updateLabels();
+    });
+    div.addEventListener('dragover', e => {
+      e.preventDefault();
+      if (div !== dragSrc) {
+        grid.querySelectorAll('.org-thumb').forEach(t => t.classList.remove('drag-target'));
+        div.classList.add('drag-target');
+      }
+    });
+    div.addEventListener('drop', e => {
+      e.preventDefault();
+      div.classList.remove('drag-target');
+      if (dragSrc && dragSrc !== div) {
+        // Insert dragSrc before or after div depending on position
+        const items = [...grid.children];
+        const srcIdx = items.indexOf(dragSrc);
+        const tgtIdx = items.indexOf(div);
+        if (srcIdx < tgtIdx) {
+          grid.insertBefore(dragSrc, div.nextSibling);
+        } else {
+          grid.insertBefore(dragSrc, div);
+        }
+        updateLabels();
+      }
+    });
+
+    return div;
+  }
+
+  function updateLabels() {
+    const thumbs = grid.querySelectorAll('.org-thumb');
+    thumbs.forEach((t, i) => {
+      t.querySelector('.pg-label').textContent = `Page ${i + 1}`;
+    });
+    orgSummary.textContent = `${thumbs.length} pages — ready to download`;
+  }
+
+  // Download reordered PDF
+  dlBtn.addEventListener('click', async () => {
+    const thumbs = [...grid.querySelectorAll('.org-thumb')];
+    const pageOrder = thumbs.map(t => parseInt(t.dataset.orig, 10));
+
+    dlBtn.disabled = true;
+    dlProgress.style.display = 'block';
+    dlFill.style.width = '15%';
+    dlLabel.textContent = 'Building PDF…';
+
+    let pct = 15;
+    const ticker = setInterval(() => {
+      pct = Math.min(pct + 12, 88);
+      dlFill.style.width = pct + '%';
+    }, 250);
+
+    try {
+      const res = await fetch('/convert/organize-pdf', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ batch_id: batchId, page_order: pageOrder })
+      });
+      clearInterval(ticker);
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ detail: 'Failed to build PDF.' }));
+        throw new Error(err.detail || 'Failed to build PDF.');
+      }
+      const blob = await res.blob();
+      dlFill.style.width = '100%';
+      dlLabel.textContent = 'Done! Download starting…';
+
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'organized.pdf';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } catch (err) {
+      clearInterval(ticker);
+      dlFill.style.width = '100%';
+      dlLabel.textContent = 'Error: ' + err.message;
+    } finally {
+      dlBtn.disabled = false;
+      setTimeout(() => { dlProgress.style.display = 'none'; }, 2500);
+    }
+  });
+})();
+</script>
+
+<script type="module">
+import { THREE, createGlowSprite, mountToolScene } from "/static/tool-scene.js";
+
+mountToolScene({
+  canvasId: "organize-pdf-scene",
+  setup({ scene, data }) {
+    const group = new THREE.Group();
+    group.position.set(5.2, 1.8, -6.4);
+    scene.add(group);
+
+    const lineMat = (opacity, color) => new THREE.LineBasicMaterial({ color, transparent: true, opacity });
+    const mat = (opacity, color) => new THREE.MeshBasicMaterial({ color, transparent: true, opacity });
+
+    // Stack of pages that fan out
+    const offsets = [-0.5, -0.2, 0.1, 0.4, 0.7];
+    offsets.forEach((x, i) => {
+      const docGroup = new THREE.Group();
+      docGroup.position.set(x * 1.1, i * 0.08, i * 0.05);
+      docGroup.rotation.z = (i - 2) * 0.06;
+
+      const bg = new THREE.Mesh(new THREE.PlaneGeometry(1.5, 2.0), mat(0.07 + i * 0.015, 0xa24b2a));
+      docGroup.add(bg);
+      const edge = new THREE.LineLoop(
+        new THREE.BufferGeometry().setFromPoints([
+          new THREE.Vector3(-0.75, 1.0, 0.01), new THREE.Vector3(0.75, 1.0, 0.01),
+          new THREE.Vector3(0.75, -1.0, 0.01), new THREE.Vector3(-0.75, -1.0, 0.01),
+        ]),
+        lineMat(0.2 + i * 0.04, 0xa24b2a)
+      );
+      docGroup.add(edge);
+
+      [-0.6, -0.3, 0.0, 0.3, 0.6].forEach(y => {
+        const w = 0.9 + Math.random() * 0.3;
+        docGroup.add(new THREE.Line(
+          new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-w/2, y, 0.02), new THREE.Vector3(w/2, y, 0.02)]),
+          lineMat(0.07, 0xf0e8d0)
+        ));
+      });
+
+      group.add(docGroup);
+    });
+
+    // Drag arrow
+    const arrowPts = [new THREE.Vector3(-1.2, 0.5, 0.3), new THREE.Vector3(1.2, -0.5, 0.3)];
+    group.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(arrowPts), lineMat(0.22, 0xe8a838)));
+
+    const glow = createGlowSprite({ inner: "rgba(232,168,56,0.18)", middle: "rgba(162,75,42,0.07)", scale: 14 });
+    glow.position.copy(group.position);
+    scene.add(glow);
+
+    Object.assign(data, { group, glow });
+  },
+  frame({ camera, pointer, state, data }, elapsed) {
+    const { group, glow } = data;
+    if (!group) return;
+    camera.position.x = pointer.x * 0.35;
+    camera.position.y = -pointer.y * 0.25;
+    camera.lookAt(0, 0, -3);
+    group.rotation.y = Math.sin(elapsed * 0.28) * 0.08 + pointer.x * 0.04;
+    group.rotation.x = Math.sin(elapsed * 0.18) * 0.03;
+    group.position.y = 1.8 + Math.sin(elapsed * 0.55) * 0.1;
+    glow.position.copy(group.position);
+    glow.scale.setScalar(14 + state.energy * 2);
+    glow.material.opacity = 0.3 + state.energy * 0.2;
+  }
+});
+</script>
+{% endblock %}

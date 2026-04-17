@@ -1,0 +1,140 @@
+﻿{% extends "base.html" %}
+{% block title %}PDF to Images{% endblock %}
+{% block content %}
+<canvas id="pdf-to-images-scene" data-tool-scene aria-hidden="true"></canvas>
+<div class="tool-scene-vignette tool-scene-vignette--right" aria-hidden="true"></div>
+
+<section class="hero hero--tool">
+  <a class="back-link" href="/">
+    <svg viewBox="0 0 16 16" fill="none" style="width:14px;height:14px;vertical-align:-.15em"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    All tools
+  </a>
+  <p class="eyebrow">Convert documents</p>
+  <h1>Turn PDF pages into <span class="highlight">clean image files.</span></h1>
+  <p class="lede">Export every page from a PDF as JPG or PNG for previews, slide decks, records, or visual sharing.</p>
+</section>
+
+<div class="tool-layout">
+  <section class="panel">
+    <form class="form" action="/convert/pdf-to-images" method="post" enctype="multipart/form-data">
+      <div class="form-cluster">
+        <div class="form-cluster__header">
+          <p class="eyebrow">Input</p>
+          <span>Upload one PDF and we will turn each page into a separate image.</span>
+        </div>
+        <label class="upload upload--drop">
+          <input type="file" name="file" accept=".pdf" required>
+          <div class="upload-inner">
+            <svg class="upload-icon" viewBox="0 0 48 48" fill="none"><rect x="8" y="12" width="32" height="26" rx="4" fill="#a24b2a" opacity=".1"/><rect x="8" y="12" width="32" height="26" rx="4" stroke="#a24b2a" stroke-width="1.8"/><path d="M24 20v12M20 24l4-4 4 4" stroke="#a24b2a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <strong>Choose a PDF file or drag and drop</strong>
+            <span>Single-page PDFs download as one image. Multi-page PDFs are bundled into a ZIP.</span>
+          </div>
+        </label>
+      </div>
+
+      <div class="form-cluster">
+        <div class="form-cluster__header">
+          <p class="eyebrow">Output</p>
+          <span>Pick the image format that fits your quality and size needs.</span>
+        </div>
+        <label class="field">
+          <span>Output format</span>
+          <div class="radio-group">
+            <label class="radio-option">
+              <input type="radio" name="fmt" value="jpg" checked>
+              <span>JPG for smaller files and lighter sharing.</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="fmt" value="png">
+              <span>PNG for sharper text, diagrams, and lossless detail.</span>
+            </label>
+          </div>
+        </label>
+      </div>
+
+      <div class="action-strip">
+        <div class="action-strip__copy">
+          <strong>Ready to export pages?</strong>
+          <span>We will keep each page separate so the output stays easy to review and reuse.</span>
+        </div>
+        <button type="submit">Convert and Download</button>
+      </div>
+    </form>
+  </section>
+
+  <aside class="tool-tips">
+    <div class="tool-tips__hero">
+      <p class="eyebrow">Workflow</p>
+      <h3>Best for visual workflows.</h3>
+      <p>Useful when you need slide-ready page previews, image archives, or fast page snapshots without editing the PDF itself.</p>
+    </div>
+    <div class="tool-tip-pills">
+      <span>Previews</span>
+      <span>Design handoff</span>
+      <span>Archives</span>
+    </div>
+    <h3>Tips</h3>
+    <ul>
+      <li>Use PNG when the PDF contains lots of text, forms, or diagrams.</li>
+      <li>Use JPG when you want smaller files for quick sharing.</li>
+      <li>For best quality, install <code>pymupdf</code> with <code>pip install pymupdf</code>.</li>
+    </ul>
+  </aside>
+</div>
+<script type="module">
+import { THREE, createGlowSprite, mountToolScene } from "/static/tool-scene.js";
+
+mountToolScene({
+  canvasId: "pdf-to-images-scene",
+  setup({ scene, data }) {
+    const group = new THREE.Group();
+    group.position.set(5.2, 1.4, -6.5);
+    scene.add(group);
+
+    const mat = (opacity, color) => new THREE.LineBasicMaterial({ color, transparent: true, opacity });
+
+    // 2x3 grid of image frames spreading outward
+    const frames = [];
+    [[-1.6, 1.5], [0, 1.5], [1.6, 1.5], [-1.6, -0.6], [0, -0.6], [1.6, -0.6]].forEach(([x, y], i) => {
+      const w = 1.1, h = 1.4;
+      const pts = [
+        new THREE.Vector3(-w / 2, h / 2, 0), new THREE.Vector3(w / 2, h / 2, 0),
+        new THREE.Vector3(w / 2, -h / 2, 0), new THREE.Vector3(-w / 2, -h / 2, 0),
+        new THREE.Vector3(-w / 2, h / 2, 0),
+      ];
+      const frame = new THREE.Line(
+        new THREE.BufferGeometry().setFromPoints(pts),
+        mat(0.12 + i * 0.015, i % 3 === 1 ? 0xe8a838 : 0xf0c060)
+      );
+      frame.position.set(x, y, i * -0.04);
+      frames.push({ frame, bx: x, by: y });
+      group.add(frame);
+    });
+
+    const glow = createGlowSprite({ inner: "rgba(232,168,56,0.18)", middle: "rgba(212,74,26,0.07)", scale: 11 });
+    glow.position.copy(group.position);
+    scene.add(glow);
+
+    Object.assign(data, { group, frames, glow });
+  },
+  frame({ camera, pointer, state, data }, elapsed) {
+    const { group, frames, glow } = data;
+    if (!group) return;
+    camera.position.x = pointer.x * 0.35;
+    camera.position.y = -pointer.y * 0.25;
+    camera.lookAt(0, 0, -3);
+    const spread = 1 + state.energy * 0.3;
+    frames.forEach(({ frame, bx, by }) => {
+      frame.position.x = bx * spread;
+      frame.position.y = by * spread;
+    });
+    group.rotation.y = Math.sin(elapsed * 0.25) * 0.07;
+    group.position.y = 1.4 + Math.sin(elapsed * 0.6) * 0.1;
+    glow.position.copy(group.position);
+    glow.scale.setScalar(11 + state.energy * 1.4);
+    glow.material.opacity = 0.32 + state.energy * 0.17;
+  }
+});
+</script>
+{% endblock %}
+

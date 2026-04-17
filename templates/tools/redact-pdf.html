@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+{% block title %}Redact PDF{% endblock %}
+{% block content %}
+<canvas id="redact-pdf-scene" data-tool-scene aria-hidden="true"></canvas>
+<div class="tool-scene-vignette tool-scene-vignette--right" aria-hidden="true"></div>
+
+<section class="hero hero--tool">
+  <a class="back-link" href="/">
+    <svg viewBox="0 0 16 16" fill="none" style="width:14px;height:14px;vertical-align:-.15em"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    All tools
+  </a>
+  <p class="eyebrow">Review and finalize</p>
+  <h1>Permanently redact <span class="highlight">sensitive text.</span></h1>
+  <p class="lede">Type the words or phrases to hide — they are replaced with solid black boxes and cannot be recovered. No cloud. Fully local.</p>
+</section>
+
+<div class="tool-layout">
+  <section class="panel">
+    <form class="form" action="/convert/redact-pdf" method="post" enctype="multipart/form-data">
+      <div class="form-cluster">
+        <div class="form-cluster__header">
+          <p class="eyebrow">Input</p>
+          <span>Upload the PDF and list what to redact.</span>
+        </div>
+        <label class="upload upload--drop">
+          <input type="file" name="file" accept=".pdf" required>
+          <div class="upload-inner">
+            <svg class="upload-icon" viewBox="0 0 48 48" fill="none"><rect x="8" y="12" width="32" height="26" rx="4" fill="#a24b2a" opacity=".1"/><rect x="8" y="12" width="32" height="26" rx="4" stroke="#a24b2a" stroke-width="1.8"/><path d="M24 20v12M20 24l4-4 4 4" stroke="#a24b2a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <strong>Choose a PDF file or drag and drop</strong>
+          </div>
+        </label>
+        <label class="field">
+          <span>Words or phrases to redact <small style="opacity:.6">(one per line)</small></span>
+          <textarea name="phrases" rows="6" placeholder="John Smith&#10;john.smith@example.com&#10;555-0100&#10;Account #12345" required style="font-family:monospace;font-size:13px"></textarea>
+        </label>
+      </div>
+
+      <div class="action-strip">
+        <div class="action-strip__copy">
+          <strong>Ready to redact</strong>
+          <span>Every match is replaced with a permanent black box — the original text cannot be recovered.</span>
+        </div>
+        <button type="submit">Redact and Download</button>
+      </div>
+    </form>
+  </section>
+
+  <aside class="tool-tips">
+    <div class="tool-tips__hero">
+      <p class="eyebrow">How it works</p>
+      <h3>Permanent, forensic-grade text removal.</h3>
+      <p>Each phrase is searched across all pages and replaced with solid black boxes using pymupdf's redaction API — the underlying text is deleted from the PDF structure, not just painted over.</p>
+    </div>
+    <div class="tool-tip-pills">
+      <span>Names</span>
+      <span>Emails</span>
+      <span>Phone numbers</span>
+      <span>Account numbers</span>
+    </div>
+    <h3>Tips</h3>
+    <ul>
+      <li>Matching is case-sensitive — add both <code>john smith</code> and <code>John Smith</code> if needed.</li>
+      <li>Use exact phrases: <code>+1 555-0100</code> only matches that exact string.</li>
+      <li>The tool searches and redacts across every page at once.</li>
+      <li>If a phrase is not found, the download is blocked and you'll see an error — so you know the document was checked.</li>
+      <li>Works on digitally-created PDFs. Scanned PDFs without an embedded text layer won't match.</li>
+    </ul>
+  </aside>
+</div>
+
+<script type="module">
+import { THREE, createGlowSprite, mountToolScene } from "/static/tool-scene.js";
+
+mountToolScene({
+  canvasId: "redact-pdf-scene",
+  setup({ scene, data }) {
+    const group = new THREE.Group();
+    group.position.set(5.2, 1.8, -6.4);
+    scene.add(group);
+
+    const mat = (opacity, color) => new THREE.MeshBasicMaterial({ color, transparent: true, opacity });
+    const lineMat = (opacity, color) => new THREE.LineBasicMaterial({ color, transparent: true, opacity });
+
+    // Document outline
+    const docGeo = new THREE.PlaneGeometry(2.4, 3.2);
+    const docMesh = new THREE.Mesh(docGeo, mat(0.08, 0xa24b2a));
+    group.add(docMesh);
+    const docEdge = new THREE.LineLoop(
+      new THREE.BufferGeometry().setFromPoints([
+        new THREE.Vector3(-1.2, 1.6, 0.01), new THREE.Vector3(1.2, 1.6, 0.01),
+        new THREE.Vector3(1.2, -1.6, 0.01), new THREE.Vector3(-1.2, -1.6, 0.01),
+      ]),
+      lineMat(0.3, 0xa24b2a)
+    );
+    group.add(docEdge);
+
+    // Text lines
+    const textLines = new THREE.Group();
+    [-1.1, -0.7, -0.3, 0.1, 0.5, 0.9, 1.3].forEach((y, i) => {
+      const w = 1.6 - (i % 2) * 0.3;
+      textLines.add(new THREE.Line(
+        new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-w/2, y, 0.02), new THREE.Vector3(w/2, y, 0.02)]),
+        lineMat(0.1, 0xddccaa)
+      ));
+    });
+    group.add(textLines);
+
+    // Redaction boxes
+    const redactBoxes = new THREE.Group();
+    [{ y: 0.5, w: 1.1, h: 0.18 }, { y: -0.3, w: 0.8, h: 0.18 }, { y: 0.9, w: 0.6, h: 0.18 }].forEach(({ y, w, h }) => {
+      const geo = new THREE.PlaneGeometry(w, h);
+      const mesh = new THREE.Mesh(geo, mat(0.85, 0x111111));
+      mesh.position.set(0, y, 0.03);
+      redactBoxes.add(mesh);
+    });
+    group.add(redactBoxes);
+
+    const glow = createGlowSprite({ inner: "rgba(30,10,10,0.28)", middle: "rgba(162,75,42,0.07)", scale: 12 });
+    glow.position.copy(group.position);
+    scene.add(glow);
+
+    Object.assign(data, { group, glow });
+  },
+  frame({ camera, pointer, state, data }, elapsed) {
+    const { group, glow } = data;
+    if (!group) return;
+    camera.position.x = pointer.x * 0.35;
+    camera.position.y = -pointer.y * 0.25;
+    camera.lookAt(0, 0, -3);
+    group.rotation.y = Math.sin(elapsed * 0.3) * 0.06 + pointer.x * 0.04;
+    group.rotation.x = Math.sin(elapsed * 0.18) * 0.025;
+    group.position.y = 1.8 + Math.sin(elapsed * 0.55) * 0.09;
+    glow.position.copy(group.position);
+    glow.scale.setScalar(12 + state.energy * 1.5 + state.success * 1.8);
+    glow.material.opacity = 0.3 + state.energy * 0.18;
+  }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,62 @@
+version: "3.9"
+
+services:
+  app:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      APP_MODE: saas
+      OLLAMA_HOST: http://ollama:11434
+      OLLAMA_OCR_MODEL: gemma4:e4b
+    depends_on:
+      ollama:
+        condition: service_healthy
+      model-puller:
+        condition: service_completed_successfully
+    volumes:
+      - ./.tmp:/app/.tmp
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/health', timeout=5)",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    command: ["uvicorn", "app_saas:app", "--host", "0.0.0.0", "--port", "8080"]
+
+  ollama:
+    image: ollama/ollama:0.20.7
+    restart: unless-stopped
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+
+  model-puller:
+    image: ollama/ollama:0.20.7
+    depends_on:
+      ollama:
+        condition: service_healthy
+    environment:
+      OLLAMA_HOST: http://ollama:11434
+    entrypoint: ["ollama"]
+    command: ["pull", "gemma4:e4b"]
+    restart: "no"
+    volumes:
+      - ollama_data:/root/.ollama
+
+volumes:
+  ollama_data:

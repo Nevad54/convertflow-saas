@@ -1,0 +1,19 @@
+<section class="insights-panel" aria-label="PDF insights">
+  <div class="insights-panel__grid">
+    <div class="insights-card insights-card--profile">
+      <div class="insights-card__header">
+        <p class="eyebrow">Document Profile</p>
+        <span>See how the app classifies the PDF before choosing an export path.</span>
+      </div>
+      <div class="insights-card__body form-note" id="{{ profile_node_id }}" data-empty="{{ profile_empty_text }}">{{ profile_empty_text }}</div>
+    </div>
+
+    <div class="insights-card insights-card--plan">
+      <div class="insights-card__header">
+        <p class="eyebrow">Export Plan</p>
+        <span>{{ plan_header_text }}</span>
+      </div>
+      <div class="insights-card__body form-note" id="{{ plan_node_id }}" data-empty="{{ plan_empty_text }}">{{ plan_empty_text }}</div>
+    </div>
+  </div>
+</section>

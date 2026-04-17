@@ -1,0 +1,1603 @@
+{% extends "base.html" %}
+{% block title %}ConvertFlow | Local-First Document Workspace{% endblock %}
+{% block content %}
+
+<canvas id="scene3d" aria-hidden="true"></canvas>
+<div class="scene-vignette" aria-hidden="true"></div>
+
+<section class="hero hero--home">
+  <div class="hero__copy">
+    <p class="eyebrow">30 PDF &amp; document tools — free to use</p>
+    <h1>PDF tools that<br><span class="highlight">actually work</span></h1>
+    {% if saas_mode %}
+    <p class="lede">Merge, compress, convert, sign, recover, and finalize documents. 30 tools. No upload limits on Free. AI-powered conversions. Your files are never stored beyond conversion time.</p>
+    {% else %}
+    <p class="lede">Merge, compress, convert, sign, recover, and finalize documents from your own machine. 30 tools. Local-first processing. Optional AI engines only when you choose them.</p>
+    {% endif %}
+    <div class="hero-actions">
+      {% if saas_mode %}
+      <a class="hero-actions__primary" href="/pricing">
+        <span>See Free vs Pro</span>
+        <small>Free forever · Pro at $12/month</small>
+      </a>
+      {% else %}
+      <a class="hero-actions__primary" href="/tool/merge-pdf">
+        <span>Open the local workspace</span>
+        <small>No sign-in · No billing · Runs on your machine</small>
+      </a>
+      {% endif %}
+      <a class="hero-actions__secondary" href="#tool-search">Browse all 30 tools</a>
+    </div>
+    <div class="hero-proof">
+      <span>30 tools, one workspace</span>
+      {% if saas_mode %}
+      <span>No upload limits on Free</span>
+      <span>AI-powered engines</span>
+      {% else %}
+      <span>Local-first processing</span>
+      <span>Optional AI engines</span>
+      {% endif %}
+    </div>
+  </div>
+  <div class="hero-brand-stage">
+    <div class="hero-brand-stage__ribbon">
+      <span>Prepare</span>
+      <span>Convert</span>
+      <span>Recover</span>
+      <span>Finalize</span>
+      <span>Local-first core</span>
+    </div>
+    <div class="hero-stage-console">
+      <div class="hero-stage-console__board">
+        <div class="hero-stage-console__topline">
+          <div>
+            <p class="hero-stage-console__eyebrow">Pillar board</p>
+            <strong>Document jobs grouped by outcome</strong>
+          </div>
+          <span class="hero-stage-console__state">Local-first</span>
+        </div>
+        <div class="hero-stage-console__queue">
+          <article class="hero-stage-console__job hero-stage-console__job--active">
+            <strong>Prepare a packet</strong>
+            <span>Merge, split, and reorder before review</span>
+          </article>
+          <article class="hero-stage-console__job">
+            <strong>Convert a contract</strong>
+            <span>PDF to Word for the next edit pass</span>
+          </article>
+          <article class="hero-stage-console__job">
+            <strong>Recover a scan</strong>
+            <span>OCR into Word, Excel, or text</span>
+          </article>
+        </div>
+        <div class="hero-stage-console__footer">
+          <span>Built for admin, finance, and operations teams</span>
+          <span>Local-first by default, with workspace memory across sessions</span>
+        </div>
+      </div>
+      <div class="hero-brand-stage__mark" aria-hidden="true">
+        <div class="hero-brand-stage__core">CF</div>
+        <span class="hero-brand-stage__node hero-brand-stage__node--pdf">PDF</span>
+        <span class="hero-brand-stage__node hero-brand-stage__node--ocr">SCAN</span>
+        <span class="hero-brand-stage__node hero-brand-stage__node--doc">DOC</span>
+        <span class="hero-brand-stage__node hero-brand-stage__node--img">OPS</span>
+        <span class="hero-brand-stage__ring hero-brand-stage__ring--outer"></span>
+        <span class="hero-brand-stage__ring hero-brand-stage__ring--inner"></span>
+      </div>
+    </div>
+    <div class="hero-stage-panel">
+      <div class="hero-stage-panel__eyebrow">Quick starts</div>
+      <div class="hero-stage-panel__routes">
+        <a href="/tool/merge-pdf">Prepare a packet for delivery</a>
+        <a href="/tool/pdf-to-word">Convert a PDF to Word</a>
+        <a href="/tool/image-to-doc">Recover scans into editable files</a>
+        <a href="/tool/edit-pdf">Finalize and secure a contract</a>
+      </div>
+    </div>
+    <div class="hero-stage-metrics">
+      <article class="hero-stage-metric">
+        <strong>Prepare packets</strong>
+        <span>Merge, split, reorder, and clean packets before delivery.</span>
+      </article>
+      <article class="hero-stage-metric">
+        <strong>Convert formats</strong>
+        <span>Move between PDF, Word, Excel, PowerPoint, HTML, and images.</span>
+      </article>
+      <article class="hero-stage-metric">
+        <strong>Finalize handoffs</strong>
+        <span>Turn edits, signatures, and security steps into a review-ready handoff.</span>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="family-strip" aria-label="Product families">
+  <button type="button" class="family-card family-card--prepare" data-filter-shortcut="prepare">
+    <span class="family-card__eyebrow">01 / Prepare</span>
+    <strong>Prepare packets</strong>
+    <span>Merge, split, rotate, extract, compress, and repair PDFs before they move on.</span>
+  </button>
+  <button type="button" class="family-card family-card--convert" data-filter-shortcut="convert">
+    <span class="family-card__eyebrow">02 / Convert</span>
+    <strong>Convert formats</strong>
+    <span>Move into or out of PDF with Word, Excel, PowerPoint, images, HTML, and text.</span>
+  </button>
+  <button type="button" class="family-card family-card--finalize" data-filter-shortcut="finalize">
+    <span class="family-card__eyebrow">03 / Finalize</span>
+    <strong>Finalize and secure</strong>
+    <span>Add text, page numbers, watermarks, redactions, signatures, and password protection.</span>
+  </button>
+  <button type="button" class="family-card family-card--recover" data-filter-shortcut="recover">
+    <span class="family-card__eyebrow">04 / Recover</span>
+    <strong>Recover scans and context</strong>
+    <span>OCR images, translate PDFs, and summarize hard-to-review files with optional AI assist.</span>
+  </button>
+</section>
+
+<section class="stats-bar">
+  <article class="stat-card">
+    <div class="stat-icon">PDF</div>
+    <div class="stat-value">30+</div>
+    <div class="stat-label">Document workflows</div>
+  </article>
+  <article class="stat-card">
+    <div class="stat-icon">Core</div>
+    <div class="stat-value">Local</div>
+    <div class="stat-label">Processing first</div>
+  </article>
+  <article class="stat-card">
+    <div class="stat-icon">Docs</div>
+    <div class="stat-value">Real</div>
+    <div class="stat-label">Business-ready flows</div>
+  </article>
+  <article class="stat-card">
+    <div class="stat-icon">Assist</div>
+    <div class="stat-value">Optional</div>
+    <div class="stat-label">Cloud or local AI</div>
+  </article>
+</section>
+
+<section class="launch-panel">
+  <div class="launch-panel__copy">
+    <p class="eyebrow">Start with the job</p>
+    <h2>Choose the pillar first, then open the exact tool.</h2>
+    <p>
+      ConvertFlow is built for operations-heavy work: prepare a packet, convert a file, recover a scan, or finalize a deliverable without leaving the workspace.
+    </p>
+    <div class="launch-panel__actions">
+      <a class="launch-panel__primary" href="#tool-search">
+        <span class="launch-panel__primary-icon">OPS</span>
+        <span>
+          <strong>Browse document workflows</strong>
+          <small>Pick a pillar, then jump to the exact tool</small>
+        </span>
+      </a>
+      <div class="launch-panel__meta">
+        <span>PDF, Word, Excel, PowerPoint, images, HTML, Markdown, TXT</span>
+        <span>Core workflows local, optional OpenAI, GitHub, or Ollama assist</span>
+      </div>
+    </div>
+  </div>
+  <div class="launch-panel__routes">
+    <a class="launch-route" href="/tool/merge-pdf">
+      <strong>Prepare and organize PDFs</strong>
+      <span>Merge, split, extract, rotate, and reorder files before delivery</span>
+    </a>
+    <a class="launch-route" href="/tool/pdf-to-word">
+      <strong>Convert PDF into Word</strong>
+      <span>Turn a document back into something editable</span>
+    </a>
+    <a class="launch-route" href="/tool/image-to-doc">
+      <strong>Recover scanned files</strong>
+      <span>Turn invoices, forms, and screenshots into working outputs</span>
+    </a>
+    <a class="launch-route" href="/tool/edit-pdf">
+      <strong>Finalize and sign a contract</strong>
+      <span>Mark up, watermark, and sign from one workspace</span>
+    </a>
+  </div>
+</section>
+
+<section class="spotlight">
+  <div class="spotlight-copy">
+    <p class="eyebrow">Recommended workflows</p>
+    <h2>Move through common document jobs without switching products.</h2>
+    <p>
+      These are the high-frequency tasks operations and admin teams tend to do every week:
+      prepare a packet, convert a file, recover a scan, and get back to an editable handoff.
+    </p>
+  </div>
+  <div class="spotlight-actions">
+    <a class="spotlight-card" href="/tool/image-to-doc">
+      <strong>Scanned invoice to Excel</strong>
+      <span>Recover line items from scanned paperwork and export them into a usable spreadsheet.</span>
+    </a>
+    <a class="spotlight-card" href="/tool/sign-pdf">
+      <strong>Contract cleanup and signing</strong>
+      <span>Watermark, page-number, edit, redact, and sign before sending the final copy.</span>
+    </a>
+    <a class="spotlight-card spotlight-card--accent" href="/tool/merge-pdf">
+      <strong>Combine and reorder a packet</strong>
+      <span>Merge files, extract the right pages, then drag the final set into the right order.</span>
+    </a>
+    <a class="spotlight-card" href="/tool/pdf-to-word">
+      <strong>PDF to editable Word</strong>
+      <span>Recover contract drafts, policies, and reports into an editable handoff file.</span>
+    </a>
+  </div>
+</section>
+
+<section class="capability-matrix">
+  <div class="capability-matrix__copy">
+    <p class="eyebrow">Capability map</p>
+    <h2>Know what stays local and what is optional.</h2>
+    <p>Core document work runs on-device. If you choose a cloud-backed engine for OCR or AI assistance, ConvertFlow treats it as an explicit accelerator rather than the default path.</p>
+  </div>
+  <div class="capability-matrix__grid">
+    <article class="capability-card">
+      <strong>Fully local core</strong>
+      <span>Merge, split, organize, sign, watermark, redact, convert, and many scan-recovery flows run on your machine.</span>
+    </article>
+    <article class="capability-card">
+      <strong>Local AI option</strong>
+      <span>Use Ollama when you want local OCR or document assist without sending files to a hosted API.</span>
+    </article>
+    <article class="capability-card">
+      <strong>Optional cloud assist</strong>
+      <span>OpenAI and GitHub Models are available only when you configure them and select those engines.</span>
+    </article>
+  </div>
+</section>
+
+<section class="workflow-rail">
+  <button type="button" class="workflow-lane workflow-lane--prepare" data-filter-shortcut="prepare">
+    <strong>Prepare PDFs</strong>
+    <span>Merge, split, extract, rotate, and organize before work starts.</span>
+  </button>
+  <button type="button" class="workflow-lane workflow-lane--convert" data-filter-shortcut="convert">
+    <strong>Convert documents</strong>
+    <span>Move between Office files, images, HTML, and structured outputs.</span>
+  </button>
+  <button type="button" class="workflow-lane workflow-lane--recover" data-filter-shortcut="recover">
+    <strong>Recover scanned files</strong>
+    <span>Pull text and structure back out of scans, screenshots, and difficult PDFs.</span>
+  </button>
+  <button type="button" class="workflow-lane workflow-lane--finalize" data-filter-shortcut="finalize">
+    <strong>Finalize and secure</strong>
+    <span>Number, watermark, redact, compare, sign, and secure the final handoff.</span>
+  </button>
+</section>
+
+<section class="tool-browser">
+  <div class="tool-browser__copy">
+    <p class="eyebrow">Workspace catalog</p>
+    <h2>Search the four pillars without losing the memory layer.</h2>
+    <p>Search still drives the catalog, while the filters keep the product grouped into Prepare, Convert, Recover, and Finalize.</p>
+  </div>
+  <div class="tool-browser__topline">
+    <p class="tool-browser__hint">Press <kbd>/</kbd> to search and <kbd>Esc</kbd> to clear.</p>
+    <p class="tool-browser__count" id="tool-browser-count" aria-live="polite"></p>
+  </div>
+  <label class="searchbar" for="tool-search">
+    <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
+      <circle cx="9" cy="9" r="5.8" stroke="currentColor" stroke-width="1.6"/>
+      <path d="M13.5 13.5L18 18" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+    </svg>
+    <input id="tool-search" type="search" placeholder="Search workflows like invoice, merge, sign, word, redact..." autocomplete="off">
+  </label>
+  <div class="filter-chips" id="filter-chips">
+    <button type="button" class="filter-chip is-active" data-filter="all">All</button>
+    <button type="button" class="filter-chip" data-filter="prepare">Prepare PDFs</button>
+    <button type="button" class="filter-chip" data-filter="convert">Convert documents</button>
+    <button type="button" class="filter-chip" data-filter="recover">Recover scanned files</button>
+    <button type="button" class="filter-chip" data-filter="finalize">Finalize and secure</button>
+  </div>
+</section>
+
+<section class="workspace-memory" id="workspace-memory">
+  <div class="workspace-memory__header">
+    <div>
+      <p class="eyebrow">Workspace memory</p>
+      <h2>Pick up where you left off.</h2>
+      <p>Recent tools, pinned tools, usage snapshots, and saved batches stay visible so the workspace keeps its context between jobs.</p>
+    </div>
+    <div class="workspace-memory__pills">
+      <span>Recent tools</span>
+      <span>Pinned tools</span>
+      <span>Saved batches</span>
+    </div>
+  </div>
+  <div class="workspace-memory__stack">
+    <section class="recent-tools" id="recent-tools" hidden>
+      <div class="recent-tools__header">
+        <p class="eyebrow">Recent tools</p>
+        <button type="button" class="recent-tools__clear" id="clear-recent-tools">Clear</button>
+      </div>
+      <div class="recent-tools__list" id="recent-tools-list"></div>
+    </section>
+
+    <section class="favorites-tools" id="favorite-tools" hidden>
+      <div class="recent-tools__header">
+        <p class="eyebrow">Pinned tools</p>
+        <button type="button" class="recent-tools__clear" id="clear-favorite-tools">Clear</button>
+      </div>
+      <div class="favorites-tools__list" id="favorite-tools-list"></div>
+    </section>
+
+    <section class="activity-board" id="activity-board" hidden>
+      <div class="activity-board__header">
+        <div>
+          <p class="eyebrow">Recent activity</p>
+          <h2>Your local workflow at a glance.</h2>
+        </div>
+        <div class="activity-board__actions">
+          <button type="button" class="recent-tools__clear" id="save-batch">Save batch</button>
+          <button type="button" class="recent-tools__clear" id="clear-recent-outputs">Clear</button>
+        </div>
+      </div>
+      <div class="activity-board__grid">
+        <article class="activity-stat">
+          <strong id="activity-total-runs">0</strong>
+          <span>completed downloads</span>
+        </article>
+        <article class="activity-stat">
+          <strong id="activity-tool-count">0</strong>
+          <span>tools used recently</span>
+        </article>
+        <article class="activity-stat">
+          <strong id="activity-top-tool">None yet</strong>
+          <span>most used tool</span>
+        </article>
+      </div>
+      <div class="activity-feed" id="activity-feed"></div>
+    </section>
+
+    <section class="saved-batches" id="saved-batches" hidden>
+      <div class="activity-board__header">
+        <div>
+          <p class="eyebrow">Saved batches</p>
+          <h2>Reusable snapshots of your workspace.</h2>
+        </div>
+        <div class="activity-board__actions">
+          <button type="button" class="recent-tools__clear" id="export-saved-batches">Export</button>
+          <button type="button" class="recent-tools__clear" id="import-saved-batches">Import</button>
+          <button type="button" class="recent-tools__clear" id="clear-saved-batches">Clear</button>
+        </div>
+      </div>
+      <div class="saved-batches__list" id="saved-batches-list"></div>
+    </section>
+    <input type="file" id="saved-batches-file" accept="application/json,.json" hidden>
+
+    <section class="batch-modal" id="batch-modal" hidden aria-hidden="true">
+      <div class="batch-modal__backdrop" data-batch-modal-close></div>
+      <div class="batch-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="batch-modal-title">
+        <div class="batch-modal__header">
+          <div>
+            <p class="eyebrow">Batch details</p>
+            <h2 id="batch-modal-title">Saved batch</h2>
+          </div>
+          <button type="button" class="batch-modal__close" data-batch-modal-close aria-label="Close batch details">&times;</button>
+        </div>
+        <div class="batch-modal__meta" id="batch-modal-meta"></div>
+        <p class="batch-modal__note" id="batch-modal-note" hidden></p>
+        <div class="batch-modal__stats" id="batch-modal-stats"></div>
+        <div class="batch-modal__outputs" id="batch-modal-outputs"></div>
+        <div class="batch-modal__actions" id="batch-modal-actions"></div>
+      </div>
+    </section>
+  </div>
+</section>
+
+<section class="empty-state" id="tool-empty-state" hidden>
+  <strong>No tools match this filter yet.</strong>
+  <span>Try a broader search, switch categories, or press <kbd>Esc</kbd> to reset the search box.</span>
+</section>
+
+<section class="tool-grid">
+  <div class="tool-grid__header">
+    <div>
+      <p class="eyebrow">Tool catalog</p>
+      <h2>Four pillars, one searchable workspace.</h2>
+      <p>Search is still the fastest path to a tool, but the catalog stays grouped so the product feels organized around outcomes.</p>
+    </div>
+    <div class="tool-grid__pills">
+      <span>Prepare</span>
+      <span>Convert</span>
+      <span>Recover</span>
+      <span>Finalize</span>
+    </div>
+  </div>
+
+  <!-- Organize -->
+  <div class="tool-category" data-category="prepare">
+    <h2 class="category-label">
+      <svg viewBox="0 0 16 16" fill="none"><rect x="1" y="2" width="6" height="12" rx="1.5" fill="currentColor" opacity=".35"/><rect x="9" y="2" width="6" height="12" rx="1.5" fill="currentColor" opacity=".35"/><path d="M4 5h2M4 8h2M4 11h1M11 5h2M11 8h2M11 11h1" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      Prepare PDFs
+    </h2>
+    <div class="cards">
+
+      <a class="card" href="/tool/merge-pdf" data-keywords="merge pdf combine organize pages files">
+        <div class="card-icon">
+          <svg viewBox="0 0 40 40" fill="none"><rect x="4" y="6" width="14" height="18" rx="2.5" fill="#a24b2a" opacity=".2"/><rect x="4" y="6" width="14" height="18" rx="2.5" stroke="#a24b2a" stroke-width="1.5"/><rect x="22" y="6" width="14" height="18" rx="2.5" fill="#a24b2a" opacity=".2"/><rect x="22" y="6" width="14" height="18" rx="2.5" stroke="#a24b2a" stroke-width="1.5"/><path d="M12 28l8 5 8-5" stroke="#a24b2a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><line x1="20" y1="33" x2="20" y2="36" stroke="#a24b2a" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </div>
+        <strong>Merge PDF</strong>
+        <span>Combine multiple PDFs into one file</span>
+      </a>
+
+      <a class="card" href="/tool/split-pdf" data-keywords="split pdf separate pages organize">
+        <div class="card-icon">
+          <svg viewBox="0 0 40 40" fill="none"><rect x="10" y="4" width="20" height="26" rx="2.5" fill="#a24b2a" opacity=".15"/><rect x="10" y="4" width="20" height="26" rx="2.5" stroke="#a24b2a" stroke-width="1.5"/><line x1="10" y1="17" x2="30" y2="17" stroke="#a24b2a" stroke-width="1.8" stroke-dasharray="2 1.5"/><path d="M6 30l14 6 14-6" stroke="#a24b2a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <strong>Split PDF</strong>
+        <span>Separate each page into its own file</span>
+      </a>
+
+      <a class="card" href="/tool/extract-pages" data-keywords="extract pages pdf organize pull pages">
+        <div class="card-icon">
+          <svg viewBox="0 0 40 40" fill="none"><rect x="6" y="4" width="20" height="26" rx="2.5" fill="#a24b2a" opacity=".1"/><rect x="6" y="4" width="20" height="26" rx="2.5" stroke="#a24b2a" stroke-width="1.5"/><rect x="16" y="10" width="18" height="22" rx="2.5" fill="white" stroke="#a24b2a" stroke-width="1.5"/><line x1="20" y1="16" x2="30" y2="16" stroke="#a24b2a" stroke-width="1.2" stroke-linecap="round"/><line x1="20" y1="19" x2="30" y2="19" stroke="#a24b2a" stroke-width="1.2" stroke-linecap="round"/><line x1="20" y1="22" x2="26" y2="22" stroke="#a24b2a" stroke-width="1.2" stroke-linecap="round"/></svg>
+        </div>
+        <strong>Extract Pages</strong>
+        <span>Pull specific pages into a new PDF</span>
+      </a>
+
+      <a class="card" href="/tool/remove-pages" data-keywords="remove pages delete pdf organize">
+        <div class="card-icon">
+          <svg viewBox="0 0 40 40" fill="none"><rect x="10" y="4" width="20" height="26" rx="2.5" fill="#a24b2a" opacity=".15"/><rect x="10" y="4" width="20" height="26" rx="2.5" stroke="#a24b2a" stroke-width="1.5"/><line x1="15" y1="15" x2="25" y2="25" stroke="#a24b2a" stroke-width="2" stroke-linecap="round"/><line x1="25" y1="15" x2="15" y2="25" stroke="#a24b2a" stroke-width="2" stroke-linecap="round"/></svg>
+        </div>
+        <strong>Remove Pages</strong>
+        <span>Delete unwanted pages from a PDF</span>
+      </a>
+
+      <a class="card" href="/tool/rotate-pdf" data-keywords="rotate pdf orientation organize pages">
+        <div class="card-icon">
+          <svg viewBox="0 0 40 40" fill="none"><rect x="12" y="8" width="18" height="22" rx="2.5" fill="#a24b2a" opacity=".15"/><rect x="12" y="8" width="18" height="22" rx="2.5" stroke="#a24b2a" stroke-width="1.5"/><path d="M28 6c3.5 2 6 5.7 6 10a12 12 0 01-12 12" stroke="#a24b2a" stroke-width="1.8" stroke-linecap="round"/><polyline points="32,4 28,6 30,10" fill="#a24b2a"/></svg>
+        </div>
+        <strong>Rotate PDF</strong>
+        <span>Rotate pages 90°, 180°, or 270°</span>
+      </a>
+
+      <a class="card" href="/tool/organize-pdf" data-keywords="organize pdf reorder pages drag drop rearrange sort order">
+        <div class="card-icon">
+          <svg viewBox="0 0 40 40" fill="none"><rect x="7" y="4" width="12" height="16" rx="2" fill="#a24b2a" opacity=".12"/><rect x="7" y="4" width="12" height="16" rx="2" stroke="#a24b2a" stroke-width="1.4"/><rect x="21" y="4" width="12" height="16" rx="2" fill="#a24b2a" opacity=".08"/><rect x="21" y="4" width="12" height="16" rx="2" stroke="#a24b2a" stroke-width="1.4"/><rect x="7" y="23" width="12" height="13" rx="2" fill="#a24b2a" opacity=".08"/><rect x="7" y="23" width="12" height="13" rx="2" stroke="#a24b2a" stroke-width="1.4"/><rect x="21" y="23" width="12" height="13" rx="2" fill="#a24b2a" opacity=".12"/><rect x="21" y="23" width="12" height="13" rx="2" stroke="#a24b2a" stroke-width="1.4"/><path d="M20 15l-3 3 3 3" stroke="#a24b2a" stroke-width="1.3" stroke-linecap="round" opacity=".5"/><path d="M20 25l3-3-3-3" stroke="#a24b2a" stroke-width="1.3" stroke-linecap="round" opacity=".5"/></svg>
+        </div>
+        <strong>Organize PDF</strong>
+        <span>Drag and drop pages into a new order</span>
+      </a>
+
+    </div>
+  </div>
+
+  <!-- Optimize -->
+  <div class="tool-category" data-category="prepare">
+    <h2 class="category-label">
+      <svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.3" opacity=".5"/><path d="M8 4.5v4l2.5 2.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+      Prepare and optimize
+    </h2>
+    <div class="cards">
+
+      <a class="card" href="/tool/compress-pdf" data-keywords="compress pdf optimize size reduce">
+        <div class="card-icon">
+          <svg viewBox="0 0 40 40" fill="none"><rect x="10" y="4" width="20" height="26" rx="2.5" fill="#a24b2a" opacity=".15"/><rect x="10" y="4" width="20" height="26" rx="2.5" stroke="#a24b2a" stroke-width="1.5"/><polyline points="20,12 20,22 16,18" stroke="#a24b2a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><polyline points="20,22 24,18" stroke="#a24b2a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><line x1="14" y1="26" x2="26" y2="26" stroke="#a24b2a" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </div>
+        <strong>Compress PDF</strong>
+        <span>Reduce file size with lossless compression</span>
+      </a>
+
+      <a class="card" href="/tool/repair-pdf" data-keywords="repair pdf optimize fix corrupted damaged">
+        <div class="card-icon">
+          <svg viewBox="0 0 40 40" fill="none"><rect x="10" y="4" width="20" height="26" rx="2.5" fill="#a24b2a" opacity=".1"/><rect x="10" y="4" width="20" height="26" rx="2.5" stroke="#a24b2a" stroke-width="1.5"/><path d="M16 20 Q20 14 24 20 Q20 26 16 20z" fill="#a24b2a" opacity=".25"/><path d="M16 20 Q20 14 24 20 Q20 26 16 20z" stroke="#a24b2a" stroke-width="1.4"/></svg>
+        </div>
+        <strong>Repair PDF</strong>
+        <span>Fix corrupted or malformed PDFs</span>
+      </a>
+
+    </div>
+  </div>
+
+  <!-- Convert TO -->
+  <div class="tool-category" data-category="convert">
+    <h2 class="category-label">
+      <svg viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" opacity=".6"/></svg>
+      Convert into PDF
+    </h2>
+    <div class="cards">
+
+      <a class="card" href="/tool/images-to-pdf" data-keywords="images to pdf jpg png convert">
+        <div class="card-icon">
+          <svg viewBox="0 0 40 40" fill="none"><rect x="4" y="8" width="24" height="20" rx="2.5" fill="#a24b2a" opacity=".12"/><rect x="4" y="8" width="24" height="20" rx="2.5" stroke="#a24b2a" stroke-width="1.5"/><circle cx="11" cy="15" r="3" fill="#a24b2a" opacity=".3"/><path d="M4 24l8-8 6 6 4-4 6 6" stroke="#a24b2a" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><rect x="22" y="14" width="14" height="18" rx="2" fill="white" stroke="#a24b2a" stroke-width="1.4"/><path d="M25 20h8M25 23h8M25 26h5" stroke="#a24b2a" stroke-width="1.1" stroke-linecap="round"/></svg>
+        </div>
+        <strong>Images to PDF</strong>
+        <span>Combine JPG, PNG and other images into PDF</span>
+      </a>
+
+      <a class="card" href="/tool/word-to-pdf" data-keywords="word to pdf docx convert">
+        <div class="card-icon">
+          <svg viewBox="0 0 40 40" fill="none"><rect x="6" y="4" width="18" height="24" rx="2.5" fill="#2b5eb8" opacity=".15"/><rect x="6" y="4" width="18" height="24" rx="2.5" stroke="#2b5eb8" stroke-width="1.5"/><text x="11" y="21" font-family="Georgia,serif" font-size="13" font-weight="bold" fill="#2b5eb8">W</text><path d="M28 16l6 4-6 4" stroke="#a24b2a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><rect x="30" y="8" width="4" height="24" rx="1" fill="#a24b2a" opacity=".2"/></svg>
+        </div>
+        <strong>Word to PDF</strong>
+        <span>Convert .docx documents to PDF</span>
+      </a>
+
+      <a class="card" href="/tool/pptx-to-pdf" data-keywords="powerpoint to pdf pptx convert presentation slides">
+        <div class="card-icon">
+          <svg viewBox="0 0 40 40" fill="none"><rect x="4" y="10" width="26" height="18" rx="2.5" fill="#c05020" opacity=".14"/><rect x="4" y="10" width="26" height="18" rx="2.5" stroke="#c05020" stroke-width="1.5"/><rect x="4" y="10" width="26" height="5" rx="2" fill="#c05020" opacity=".12"/><path d="M8 18h12M8 22h8" stroke="#a24b2a" stroke-width="1.2" stroke-linecap="round"/><path d="M33 19l5 3-5 3" stroke="#a24b2a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><rect x="34" y="8" width="2" height="22" rx="1" fill="#a24b2a" opacity=".18"/></svg>
+        </div>
+        <strong>PowerPoint to PDF</strong>
+        <span>Export .pptx presentations to PDF</span>
+      </a>
+
+      <a class="card" href="/tool/excel-to-pdf" data-keywords="excel to pdf xlsx spreadsheet convert table">
+        <div class="card-icon">
+          <svg viewBox="0 0 40 40" fill="none"><rect x="4" y="6" width="24" height="28" rx="2.5" fill="#1d6f42" opacity=".12"/><rect x="4" y="6" width="24" height="28" rx="2.5" stroke="#1d6f42" stroke-width="1.5"/><line x1="4" y1="13" x2="28" y2="13" stroke="#1d6f42" stroke-width="1.2"/><line x1="4" y1="20" x2="28" y2="20" stroke="#1d6f42" stroke-width="1.2"/><line x1="4" y1="27" x2="28" y2="27" stroke="#1d6f42" stroke-width="1.2"/><line x1="12" y1="6" x2="12" y2="34" stroke="#1d6f42" stroke-width="1.2"/><line x1="20" y1="6" x2="20" y2="34" stroke="#1d6f42" stroke-width="1.2"/><path d="M31 19l5 3-5 3" stroke="#a24b2a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><rect x="32" y="8" width="2" height="22" rx="1" fill="#a24b2a" opacity=".18"/></svg>
+        </div>
+        <strong>Excel to PDF</strong>
+        <span>Export .xlsx spreadsheets as PDF tables</span>
+      </a>
+
+      <a class="card" href="/tool/html-to-pdf" data-keywords="html to pdf convert web page htm">
+        <div class="card-icon">
+          <svg viewBox="0 0 40 40" fill="none"><rect x="4" y="6" width="24" height="28" rx="2.5" fill="#a24b2a" opacity=".1"/><rect x="4" y="6" width="24" height="28" rx="2.5" stroke="#a24b2a" stroke-width="1.5"/><path d="M10 17l-3 3 3 3M18 17l3 3-3 3M13 24l2-8" stroke="#a24b2a" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M31 19l5 3-5 3" stroke="#a24b2a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><rect x="32" y="8" width="2" height="22" rx="1" fill="#a24b2a" opacity=".18"/></svg>
+        </div>
+        <strong>HTML to PDF</strong>
+        <span>Render HTML pages as a PDF document</span>
+      </a>
+
+    </div>
+  </div>
+
+  <!-- Convert FROM -->
+  <div class="tool-category" data-category="convert">
+    <h2 class="category-label">
+      <svg viewBox="0 0 16 16" fill="none"><path d="M13 8H3M7 4L3 8l4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" opacity=".6"/></svg>
+      Convert out of PDF
+    </h2>
+    <div class="cards">
+
+      <a class="card" href="/tool/pdf-to-word" data-keywords="pdf to word convert docx editable">
+        <div class="card-icon">
+          <svg viewBox="0 0 40 40" fill="none"><rect x="4" y="4" width="18" height="24" rx="2.5" fill="#a24b2a" opacity=".15"/><rect x="4" y="4" width="18" height="24" rx="2.5" stroke="#a24b2a" stroke-width="1.5"/><path d="M8 10h10M8 14h10M8 18h7" stroke="#a24b2a" stroke-width="1.2" stroke-linecap="round"/><path d="M25 16l6 4-6 4" stroke="#2b5eb8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><rect x="28" y="8" width="8" height="22" rx="2" fill="#2b5eb8" opacity=".15"/><rect x="28" y="8" width="8" height="22" rx="2" stroke="#2b5eb8" stroke-width="1.4"/><text x="29.5" y="23" font-family="Georgia,serif" font-size="9" font-weight="bold" fill="#2b5eb8">W</text></svg>
+        </div>
+        <strong>PDF to Word</strong>
+        <span>Convert PDF text into an editable .docx</span>
+      </a>
+
+      <a class="card" href="/tool/pdf-to-text" data-keywords="pdf to text convert extract text">
+        <div class="card-icon">
+          <svg viewBox="0 0 40 40" fill="none"><rect x="6" y="4" width="18" height="24" rx="2.5" fill="#a24b2a" opacity=".15"/><rect x="6" y="4" width="18" height="24" rx="2.5" stroke="#a24b2a" stroke-width="1.5"/><path d="M28 14l6 6-6 6" stroke="#a24b2a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 10h10M10 14h10M10 18h7M10 22h4" stroke="#a24b2a" stroke-width="1.2" stroke-linecap="round"/></svg>
+        </div>
+        <strong>PDF to Text</strong>
+        <span>Extract raw text from PDF pages</span>
+      </a>
+
+      <a class="card" href="/tool/pdf-to-images" data-keywords="pdf to images jpg png convert">
+        <div class="card-icon">
+          <svg viewBox="0 0 40 40" fill="none"><rect x="4" y="4" width="18" height="24" rx="2.5" fill="#a24b2a" opacity=".15"/><rect x="4" y="4" width="18" height="24" rx="2.5" stroke="#a24b2a" stroke-width="1.5"/><path d="M26 16l6 4-6 4" stroke="#a24b2a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><rect x="28" y="8" width="8" height="22" rx="2" fill="#a24b2a" opacity=".1"/><rect x="28" y="8" width="8" height="22" rx="2" stroke="#a24b2a" stroke-width="1.2"/><circle cx="32" cy="15" r="2" fill="#a24b2a" opacity=".3"/><path d="M29 26l3-4 3 4" stroke="#a24b2a" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <strong>PDF to Images</strong>
+        <span>Save each PDF page as a JPG or PNG</span>
+      </a>
+
+      <a class="card" href="/tool/pdf-to-svg" data-keywords="pdf to svg cad drawing vector editable lines text preserve">
+        <div class="card-icon">
+          <svg viewBox="0 0 40 40" fill="none"><rect x="4" y="4" width="18" height="24" rx="2.5" fill="#a24b2a" opacity=".15"/><rect x="4" y="4" width="18" height="24" rx="2.5" stroke="#a24b2a" stroke-width="1.5"/><path d="M25 12l3 3-3 3M29 12l3 3-3 3" stroke="#0f766e" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M27 24c1.8-4.2 5.8-5.2 8-1.5-2.5 4.8-6 5.3-8 1.5z" fill="#0f766e" opacity=".16"/><path d="M27 24c1.8-4.2 5.8-5.2 8-1.5-2.5 4.8-6 5.3-8 1.5z" stroke="#0f766e" stroke-width="1.3" stroke-linejoin="round"/></svg>
+        </div>
+        <strong>PDF to SVG</strong>
+        <span>Preserve vector drawings, text, orientation, and page size</span>
+      </a>
+
+      <a class="card" href="/tool/pdf-to-excel" data-keywords="pdf to excel xlsx spreadsheet convert table extract data">
+        <div class="card-icon">
+          <svg viewBox="0 0 40 40" fill="none"><rect x="4" y="4" width="18" height="24" rx="2.5" fill="#a24b2a" opacity=".15"/><rect x="4" y="4" width="18" height="24" rx="2.5" stroke="#a24b2a" stroke-width="1.5"/><path d="M8 10h10M8 14h10M8 18h7" stroke="#a24b2a" stroke-width="1.2" stroke-linecap="round"/><path d="M25 16l6 4-6 4" stroke="#1d6f42" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><rect x="27" y="6" width="9" height="24" rx="2" fill="#1d6f42" opacity=".12"/><rect x="27" y="6" width="9" height="24" rx="2" stroke="#1d6f42" stroke-width="1.4"/><line x1="27" y1="13" x2="36" y2="13" stroke="#1d6f42" stroke-width="1.1"/><line x1="27" y1="19" x2="36" y2="19" stroke="#1d6f42" stroke-width="1.1"/><line x1="31" y1="6" x2="31" y2="30" stroke="#1d6f42" stroke-width="1.1"/></svg>
+        </div>
+        <strong>PDF to Excel</strong>
+        <span>Extract tables from PDFs into editable spreadsheets</span>
+      </a>
+
+      <a class="card" href="/tool/pdf-to-pptx" data-keywords="pdf to powerpoint pptx convert slides presentation">
+        <div class="card-icon">
+          <svg viewBox="0 0 40 40" fill="none"><rect x="4" y="4" width="18" height="24" rx="2.5" fill="#a24b2a" opacity=".15"/><rect x="4" y="4" width="18" height="24" rx="2.5" stroke="#a24b2a" stroke-width="1.5"/><path d="M8 10h10M8 14h10M8 18h7" stroke="#a24b2a" stroke-width="1.2" stroke-linecap="round"/><path d="M25 16l5 3-5 3" stroke="#c05020" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><rect x="27" y="8" width="10" height="18" rx="2" fill="#c05020" opacity=".12"/><rect x="27" y="8" width="10" height="18" rx="2" stroke="#c05020" stroke-width="1.4"/><rect x="27" y="8" width="10" height="4" rx="1.5" fill="#c05020" opacity=".2"/></svg>
+        </div>
+        <strong>PDF to PowerPoint</strong>
+        <span>Convert PDF pages into editable .pptx slides</span>
+      </a>
+
+      <a class="card" href="/tool/pdf-to-pdfa" data-keywords="pdf to pdfa archive convert iso compliance long-term">
+        <div class="card-icon">
+          <svg viewBox="0 0 40 40" fill="none"><rect x="8" y="4" width="18" height="24" rx="2.5" fill="#a24b2a" opacity=".15"/><rect x="8" y="4" width="18" height="24" rx="2.5" stroke="#a24b2a" stroke-width="1.5"/><path d="M12 10h10M12 14h10M12 18h7" stroke="#a24b2a" stroke-width="1.2" stroke-linecap="round"/><circle cx="29" cy="28" r="7" fill="white" stroke="#a24b2a" stroke-width="1.5"/><text x="25.5" y="32" font-family="'Trebuchet MS',Arial,sans-serif" font-size="9" font-weight="bold" fill="#a24b2a">A</text></svg>
+        </div>
+        <strong>PDF to PDF/A</strong>
+        <span>Convert to archival PDF/A-1b format</span>
+      </a>
+
+    </div>
+  </div>
+
+  <!-- Finalize -->
+  <div class="tool-category" data-category="finalize">
+    <h2 class="category-label">
+      <svg viewBox="0 0 16 16" fill="none"><path d="M11 2l3 3-8 8H3v-3l8-8z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" opacity=".6"/></svg>
+      Finalize and secure
+    </h2>
+    <div class="cards">
+
+      <a class="card card--edit" href="/tool/edit-pdf" data-keywords="edit pdf annotate whiteout add text overlay correction" data-catalog-hidden>
+        <div class="card-icon">
+          <svg viewBox="0 0 40 40" fill="none"><rect x="7" y="4" width="26" height="32" rx="2.5" fill="#a24b2a" opacity=".08"/><rect x="7" y="4" width="26" height="32" rx="2.5" stroke="#a24b2a" stroke-width="1.5"/><path d="M14 12h12M14 17h9" stroke="#a24b2a" stroke-width="1.2" stroke-linecap="round"/><path d="M24.5 23.5l5 5M29.5 21l1.5 1.5-5.75 5.75H23.75v-1.5L29.5 21z" stroke="#1a1a2e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><rect x="12" y="24" width="8" height="5" rx="1" fill="white" stroke="#1a1a2e" stroke-width="1.2"/></svg>
+        </div>
+        <strong>Edit PDF</strong>
+        <span>Add text, whiteout, shapes, and signatures on page previews</span>
+      </a>
+
+      <a class="card card--edit" href="/tool/add-page-numbers" data-keywords="add page numbers edit pdf number footer header">
+        <div class="card-icon">
+          <svg viewBox="0 0 40 40" fill="none"><rect x="10" y="4" width="20" height="28" rx="2.5" fill="#a24b2a" opacity=".12"/><rect x="10" y="4" width="20" height="28" rx="2.5" stroke="#a24b2a" stroke-width="1.5"/><path d="M14 10h12M14 14h12M14 18h8" stroke="#a24b2a" stroke-width="1.2" stroke-linecap="round"/><text x="18" y="30" font-family="'Trebuchet MS',Arial,sans-serif" font-size="7" fill="#a24b2a" font-weight="bold">1 / 4</text></svg>
+        </div>
+        <strong>Add Page Numbers</strong>
+        <span>Stamp page numbers on every page</span>
+      </a>
+
+      <a class="card card--edit" href="/tool/watermark-pdf" data-keywords="watermark pdf edit draft confidential stamp">
+        <div class="card-icon">
+          <svg viewBox="0 0 40 40" fill="none"><rect x="6" y="4" width="28" height="34" rx="2.5" fill="#a24b2a" opacity=".08"/><rect x="6" y="4" width="28" height="34" rx="2.5" stroke="#a24b2a" stroke-width="1.5"/><text x="8" y="27" font-family="'Trebuchet MS',Arial,sans-serif" font-size="8.5" fill="#a24b2a" opacity=".35" transform="rotate(-30 20 21)" font-weight="bold">DRAFT</text></svg>
+        </div>
+        <strong>Watermark PDF</strong>
+        <span>Add a diagonal text watermark to pages</span>
+      </a>
+
+      <a class="card card--edit" href="/tool/crop-pdf" data-keywords="crop pdf trim margins edit white space border">
+        <div class="card-icon">
+          <svg viewBox="0 0 40 40" fill="none"><rect x="6" y="4" width="28" height="34" rx="2.5" fill="#a24b2a" opacity=".08"/><rect x="6" y="4" width="28" height="34" rx="2.5" stroke="#a24b2a" stroke-width="1.3" stroke-dasharray="2.5 1.5"/><rect x="11" y="9" width="18" height="22" rx="1.5" fill="#a24b2a" opacity=".1"/><rect x="11" y="9" width="18" height="22" rx="1.5" stroke="#a24b2a" stroke-width="1.5"/><line x1="6" y1="9" x2="11" y2="9" stroke="#a24b2a" stroke-width="1.5" stroke-linecap="round"/><line x1="11" y1="4" x2="11" y2="9" stroke="#a24b2a" stroke-width="1.5" stroke-linecap="round"/><line x1="29" y1="4" x2="29" y2="9" stroke="#a24b2a" stroke-width="1.5" stroke-linecap="round"/><line x1="29" y1="9" x2="34" y2="9" stroke="#a24b2a" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </div>
+        <strong>Crop PDF</strong>
+        <span>Trim margins from every page by millimeters</span>
+      </a>
+
+      <a class="card card--edit" href="/tool/redact-pdf" data-keywords="redact pdf black out hide sensitive text names email phone privacy">
+        <div class="card-icon">
+          <svg viewBox="0 0 40 40" fill="none"><rect x="6" y="4" width="28" height="34" rx="2.5" fill="#a24b2a" opacity=".08"/><rect x="6" y="4" width="28" height="34" rx="2.5" stroke="#a24b2a" stroke-width="1.5"/><rect x="9" y="14" width="14" height="4" rx="1" fill="#111"/><rect x="9" y="21" width="10" height="4" rx="1" fill="#111"/><path d="M14 10h12M26 20h5M26 26h5" stroke="#a24b2a" stroke-width="1.1" stroke-linecap="round" opacity=".35"/></svg>
+        </div>
+        <strong>Redact PDF</strong>
+        <span>Permanently black out sensitive words and phrases</span>
+      </a>
+
+      <a class="card card--edit" href="/tool/compare-pdf" data-keywords="compare pdf diff difference two versions changes track document review">
+        <div class="card-icon">
+          <svg viewBox="0 0 40 40" fill="none"><rect x="4" y="6" width="14" height="28" rx="2" fill="#a24b2a" opacity=".08"/><rect x="4" y="6" width="14" height="28" rx="2" stroke="#a24b2a" stroke-width="1.4"/><rect x="22" y="6" width="14" height="28" rx="2" fill="#a24b2a" opacity=".08"/><rect x="22" y="6" width="14" height="28" rx="2" stroke="#a24b2a" stroke-width="1.4"/><path d="M7 13h8M7 17h6M7 21h8M7 25h5" stroke="#a24b2a" stroke-width="1.1" stroke-linecap="round" opacity=".3"/><path d="M25 13h8M25 17h8" stroke="#2e6e2e" stroke-width="1.1" stroke-linecap="round" opacity=".7"/><path d="M25 21h6M25 25h8" stroke="#6e2e2e" stroke-width="1.1" stroke-linecap="round" opacity=".7"/><path d="M18.5 20h3" stroke="#a24b2a" stroke-width="1.3" stroke-linecap="round"/></svg>
+        </div>
+        <strong>Compare PDF</strong>
+        <span>Side-by-side diff report of two document versions</span>
+      </a>
+
+      <a class="card card--edit" href="/tool/sign-pdf" data-keywords="sign pdf signature draw canvas embed digital sign document">
+        <div class="card-icon">
+          <svg viewBox="0 0 40 40" fill="none"><rect x="6" y="4" width="28" height="34" rx="2.5" fill="#a24b2a" opacity=".08"/><rect x="6" y="4" width="28" height="34" rx="2.5" stroke="#a24b2a" stroke-width="1.5"/><path d="M10 10h20M10 15h14M10 20h16" stroke="#a24b2a" stroke-width="1.1" stroke-linecap="round" opacity=".25"/><path d="M10 30 Q14 26 17 29 Q20 32 24 26 Q27 22 30 28" stroke="#e8a838" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+        </div>
+        <strong>Sign PDF</strong>
+        <span>Draw and embed your signature into a PDF</span>
+      </a>
+
+    </div>
+  </div>
+
+  <!-- Protect -->
+  <div class="tool-category" data-category="finalize">
+    <h2 class="category-label">
+      <svg viewBox="0 0 16 16" fill="none"><path d="M8 2L3 4.5v4C3 12 8 15 8 15s5-3 5-6.5v-4L8 2z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" opacity=".55"/></svg>
+      Protect and unlock
+    </h2>
+    <div class="cards">
+
+      <a class="card" href="/tool/protect-pdf" data-keywords="protect pdf password security encrypt">
+        <div class="card-icon">
+          <svg viewBox="0 0 40 40" fill="none"><rect x="8" y="18" width="24" height="18" rx="3" fill="#a24b2a" opacity=".15"/><rect x="8" y="18" width="24" height="18" rx="3" stroke="#a24b2a" stroke-width="1.5"/><path d="M14 18v-5a6 6 0 0112 0v5" stroke="#a24b2a" stroke-width="1.8" stroke-linecap="round"/><circle cx="20" cy="27" r="3" fill="#a24b2a" opacity=".4"/><line x1="20" y1="30" x2="20" y2="33" stroke="#a24b2a" stroke-width="1.6" stroke-linecap="round"/></svg>
+        </div>
+        <strong>Protect PDF</strong>
+        <span>Password-encrypt a PDF file</span>
+      </a>
+
+      <a class="card" href="/tool/unlock-pdf" data-keywords="unlock pdf password security remove">
+        <div class="card-icon">
+          <svg viewBox="0 0 40 40" fill="none"><rect x="8" y="18" width="24" height="18" rx="3" fill="#a24b2a" opacity=".12"/><rect x="8" y="18" width="24" height="18" rx="3" stroke="#a24b2a" stroke-width="1.5"/><path d="M14 18v-5a6 6 0 0112 0" stroke="#a24b2a" stroke-width="1.8" stroke-linecap="round"/><path d="M26 13v-2" stroke="#a24b2a" stroke-width="1.8" stroke-linecap="round" opacity=".4"/><circle cx="20" cy="27" r="3" fill="#a24b2a" opacity=".35"/><line x1="20" y1="30" x2="20" y2="33" stroke="#a24b2a" stroke-width="1.6" stroke-linecap="round"/></svg>
+        </div>
+        <strong>Unlock PDF</strong>
+        <span>Remove password from a PDF you own</span>
+      </a>
+
+    </div>
+  </div>
+
+  <!-- AI / PDF Intelligence -->
+  <div class="tool-category" data-category="recover">
+    <h2 class="category-label">
+      <svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5.5" stroke="currentColor" stroke-width="1.3" opacity=".5"/><path d="M6 6c0-1.1.9-2 2-2s2 .9 2 2c0 .8-.5 1.5-1.2 1.8L8 8.5V10" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><circle cx="8" cy="12" r=".8" fill="currentColor"/></svg>
+      Recover and assist
+    </h2>
+    <div class="cards">
+
+      <a class="card card--featured" href="/tool/summarize-pdf" data-keywords="summarize pdf ai summary key points overview local ollama gemma">
+        <div class="card-icon card-icon--lg">
+          <svg viewBox="0 0 48 48" fill="none"><rect x="4" y="6" width="24" height="30" rx="3" fill="#a24b2a" opacity=".12"/><rect x="4" y="6" width="24" height="30" rx="3" stroke="#a24b2a" stroke-width="1.8"/><path d="M9 13h14M9 18h14M9 23h10M9 28h7" stroke="#a24b2a" stroke-width="1.4" stroke-linecap="round"/><circle cx="36" cy="28" r="9" fill="white" stroke="#a24b2a" stroke-width="1.5"/><path d="M33 28h6M33 25h4M33 31h5" stroke="#a24b2a" stroke-width="1.3" stroke-linecap="round"/></svg>
+        </div>
+        <div class="card-featured-body">
+          <strong>Summarize PDF</strong>
+          <span>Get a concise structured summary of any PDF with local-first or optional cloud-backed assist.</span>
+        </div>
+        <div class="card-arrow">
+          <svg viewBox="0 0 20 20" fill="none"><path d="M5 10h10M11 6l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+      </a>
+
+      <a class="card" href="/tool/translate-pdf" data-keywords="translate pdf language spanish french german ai local ollama">
+        <div class="card-icon">
+          <svg viewBox="0 0 40 40" fill="none"><rect x="4" y="6" width="16" height="20" rx="2.5" fill="#a24b2a" opacity=".12"/><rect x="4" y="6" width="16" height="20" rx="2.5" stroke="#a24b2a" stroke-width="1.5"/><path d="M7 12h10M7 16h8M7 20h6" stroke="#a24b2a" stroke-width="1.2" stroke-linecap="round"/><path d="M23 18l4 3-4 3" stroke="#2dd4a8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><rect x="24" y="8" width="12" height="20" rx="2.5" fill="#2dd4a8" opacity=".1"/><rect x="24" y="8" width="12" height="20" rx="2.5" stroke="#2dd4a8" stroke-width="1.4"/><path d="M27 14h6M27 18h4M27 22h5" stroke="#2dd4a8" stroke-width="1.1" stroke-linecap="round"/></svg>
+        </div>
+        <strong>Translate PDF</strong>
+        <span>Translate any PDF into 20+ languages with local or optional cloud assistance</span>
+      </a>
+
+    </div>
+  </div>
+
+  <!-- OCR -->
+  <div class="tool-category" data-category="recover">
+    <h2 class="category-label">
+      <svg viewBox="0 0 16 16" fill="none"><rect x="1" y="3" width="14" height="10" rx="2" stroke="currentColor" stroke-width="1.3" opacity=".5"/><path d="M5 8h6M8 6v4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" opacity=".7"/></svg>
+      Recover scanned files
+    </h2>
+    <div class="cards">
+
+      <a class="card card--featured" href="/tool/image-to-doc" data-keywords="image to document ocr scan convert word pdf excel html markdown text">
+        <div class="card-icon card-icon--lg">
+          <svg viewBox="0 0 48 48" fill="none"><rect x="4" y="6" width="26" height="34" rx="3" fill="#a24b2a" opacity=".12"/><rect x="4" y="6" width="26" height="34" rx="3" stroke="#a24b2a" stroke-width="1.8"/><path d="M10 14h14M10 19h14M10 24h10M10 29h6" stroke="#a24b2a" stroke-width="1.4" stroke-linecap="round"/><rect x="28" y="22" width="16" height="20" rx="2.5" fill="white" stroke="#a24b2a" stroke-width="1.4"/><path d="M31 29l3 3 5-5" stroke="#a24b2a" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="38" cy="16" r="7" fill="white" stroke="#a24b2a" stroke-width="1.5"/><path d="M38 13v3l2 2" stroke="#a24b2a" stroke-width="1.3" stroke-linecap="round"/></svg>
+        </div>
+        <div class="card-featured-body">
+          <strong>Image to Document</strong>
+          <span>Recover scans and screenshots into Word, PDF, Excel, PowerPoint, Markdown, HTML, or plain text from the same workspace.</span>
+        </div>
+        <div class="card-arrow">
+          <svg viewBox="0 0 20 20" fill="none"><path d="M5 10h10M11 6l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+      </a>
+
+    </div>
+  </div>
+
+</section>
+
+<script>
+  const toolSearch = document.getElementById("tool-search");
+  const filterChips = Array.from(document.querySelectorAll(".filter-chip"));
+  const filterShortcuts = Array.from(document.querySelectorAll("[data-filter-shortcut]"));
+  const categories = Array.from(document.querySelectorAll(".tool-category"));
+  let activeFilter = "all";
+  const recentTools = document.getElementById("recent-tools");
+  const recentToolsList = document.getElementById("recent-tools-list");
+  const clearRecentTools = document.getElementById("clear-recent-tools");
+  const favoriteTools = document.getElementById("favorite-tools");
+  const favoriteToolsList = document.getElementById("favorite-tools-list");
+  const clearFavoriteTools = document.getElementById("clear-favorite-tools");
+  const activityBoard = document.getElementById("activity-board");
+  const activityFeed = document.getElementById("activity-feed");
+  const clearRecentOutputs = document.getElementById("clear-recent-outputs");
+  const activityTotalRuns = document.getElementById("activity-total-runs");
+  const activityToolCount = document.getElementById("activity-tool-count");
+  const activityTopTool = document.getElementById("activity-top-tool");
+  const saveBatchButton = document.getElementById("save-batch");
+  const savedBatches = document.getElementById("saved-batches");
+  const savedBatchesList = document.getElementById("saved-batches-list");
+  const clearSavedBatches = document.getElementById("clear-saved-batches");
+  const exportSavedBatches = document.getElementById("export-saved-batches");
+  const importSavedBatches = document.getElementById("import-saved-batches");
+  const savedBatchesFile = document.getElementById("saved-batches-file");
+  const batchModal = document.getElementById("batch-modal");
+  const batchModalTitle = document.getElementById("batch-modal-title");
+  const batchModalMeta = document.getElementById("batch-modal-meta");
+  const batchModalNote = document.getElementById("batch-modal-note");
+  const batchModalStats = document.getElementById("batch-modal-stats");
+  const batchModalOutputs = document.getElementById("batch-modal-outputs");
+  const batchModalActions = document.getElementById("batch-modal-actions");
+  const toolBrowserCount = document.getElementById("tool-browser-count");
+  const toolEmptyState = document.getElementById("tool-empty-state");
+
+  function getAllToolCards() {
+    return Array.from(document.querySelectorAll(".tool-grid .card"));
+  }
+
+  function getVisibleToolCards() {
+    return getAllToolCards().filter((card) => {
+      if (card.hidden) return false;
+      const category = card.closest(".tool-category");
+      return !category || !category.hidden;
+    });
+  }
+
+  function getFavorites() {
+    return JSON.parse(localStorage.getItem("favoriteTools") || "[]");
+  }
+
+  function setFavorites(items) {
+    localStorage.setItem("favoriteTools", JSON.stringify(items.slice(0, 8)));
+  }
+
+  function getCardMeta(card) {
+    return {
+      path: card.getAttribute("href") || "",
+      label: card.querySelector("strong")?.textContent?.trim() || card.textContent.trim()
+    };
+  }
+
+  function syncFavoriteButtons() {
+    const favorites = new Set(getFavorites().map((item) => item.path));
+    getAllToolCards().forEach((card) => {
+      const button = card.querySelector(".favorite-toggle");
+      if (!button) return;
+      const path = card.getAttribute("href") || "";
+      const isFavorite = favorites.has(path);
+      button.dataset.active = isFavorite ? "true" : "false";
+      button.setAttribute("aria-pressed", isFavorite ? "true" : "false");
+      button.setAttribute("aria-label", isFavorite ? "Unpin tool" : "Pin tool");
+      button.title = isFavorite ? "Unpin tool" : "Pin tool";
+    });
+  }
+
+  function renderFavoriteTools() {
+    if (!favoriteTools || !favoriteToolsList) return;
+    favoriteToolsList.innerHTML = "";
+    const favorites = getFavorites();
+
+    if (!favorites.length) {
+      favoriteTools.hidden = true;
+      return;
+    }
+
+    favorites.forEach((item) => {
+      const link = document.createElement("a");
+      link.className = "favorite-tool";
+      link.href = item.path;
+      link.textContent = item.label || item.path;
+      favoriteToolsList.appendChild(link);
+    });
+
+    favoriteTools.hidden = false;
+  }
+
+  function ensureFavoriteButtons() {
+    getAllToolCards().forEach((card) => {
+      if (card.querySelector(".favorite-toggle")) return;
+      const meta = getCardMeta(card);
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "favorite-toggle";
+      button.dataset.path = meta.path;
+      button.dataset.label = meta.label;
+      button.innerHTML = '<span aria-hidden="true">&#9733;</span>';
+      card.appendChild(button);
+    });
+    syncFavoriteButtons();
+  }
+
+  function renderRecentTools() {
+    if (!recentTools || !recentToolsList) return;
+    const items = JSON.parse(localStorage.getItem("recentTools") || "[]");
+    recentToolsList.innerHTML = "";
+
+    if (!items.length) {
+      recentTools.hidden = true;
+      return;
+    }
+
+    items.forEach((item) => {
+      const link = document.createElement("a");
+      link.className = "recent-tool";
+      link.href = item.path;
+      link.textContent = item.label || item.path;
+      recentToolsList.appendChild(link);
+    });
+
+    recentTools.hidden = false;
+  }
+
+  function formatRelativeTime(isoString) {
+    if (!isoString) return "Just now";
+    const diffMs = Date.now() - new Date(isoString).getTime();
+    const minutes = Math.max(0, Math.round(diffMs / 60000));
+    if (minutes < 1) return "Just now";
+    if (minutes < 60) return `${minutes} min ago`;
+    const hours = Math.round(minutes / 60);
+    if (hours < 24) return `${hours} hr ago`;
+    const days = Math.round(hours / 24);
+    return `${days} day${days === 1 ? "" : "s"} ago`;
+  }
+
+  function escapeHtml(value) {
+    return String(value ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#39;");
+  }
+
+  function formatToolRouteLabel(value) {
+    if (!value || typeof value !== "string") return "Mixed tools";
+    const normalized = value
+      .replace(/^\/(tool|convert)\//, "")
+      .replaceAll("-", " ")
+      .trim();
+    if (!normalized) return "Mixed tools";
+    return normalized.replace(/\b\w/g, (char) => char.toUpperCase());
+  }
+
+  function normalizeSavedBatch(batch) {
+    if (!batch || typeof batch !== "object") return null;
+    return {
+      id: typeof batch.id === "string" && batch.id ? batch.id : String(Date.now() + Math.random()),
+      name: typeof batch.name === "string" && batch.name.trim() ? batch.name.trim() : "Saved batch",
+      createdAt: batch.createdAt || new Date().toISOString(),
+      starred: Boolean(batch.starred),
+      note: typeof batch.note === "string" ? batch.note.trim() : "",
+      outputs: Array.isArray(batch.outputs) ? batch.outputs.filter(Boolean).map((item) => ({
+        filename: typeof item?.filename === "string" && item.filename.trim() ? item.filename.trim() : "Output file",
+        extension: typeof item?.extension === "string" && item.extension.trim() ? item.extension.trim() : "FILE",
+        tool: typeof item?.tool === "string" && item.tool.trim() ? item.tool.trim() : "Document Tool",
+        recordedAt: item?.recordedAt || batch.createdAt || new Date().toISOString(),
+        route: typeof item?.route === "string" ? item.route : ""
+      })) : [],
+      usage: batch.usage && typeof batch.usage === "object" ? batch.usage : {},
+      recent: Array.isArray(batch.recent) ? batch.recent.filter((item) => typeof item === "string") : [],
+      favorites: Array.isArray(batch.favorites) ? batch.favorites.filter(Boolean) : [],
+      pinnedOutputs: Array.isArray(batch.pinnedOutputs) ? batch.pinnedOutputs.filter((item) => typeof item === "string") : []
+    };
+  }
+
+  function renderActivityBoard() {
+    if (!activityBoard || !activityFeed) return;
+
+    const outputs = JSON.parse(localStorage.getItem("recentOutputs") || "[]");
+    const usage = JSON.parse(localStorage.getItem("toolUsageStats") || "{}");
+    const usageEntries = Object.entries(usage).sort((a, b) => b[1] - a[1]);
+    const labelMap = Object.fromEntries(getAllToolCards().map((card) => {
+      const meta = getCardMeta(card);
+      return [meta.path.replace("/tool/", "/convert/"), meta.label];
+    }));
+
+    activityFeed.innerHTML = "";
+    if (activityTotalRuns) activityTotalRuns.textContent = String(outputs.length);
+    if (activityToolCount) activityToolCount.textContent = String(usageEntries.length);
+    if (activityTopTool) {
+      const topPath = usageEntries[0]?.[0] || "";
+      const topCount = usageEntries[0]?.[1] || 0;
+      activityTopTool.textContent = topCount ? `${labelMap[topPath] || "Document Tool"} (${topCount})` : "None yet";
+    }
+
+    if (!outputs.length) {
+      activityBoard.hidden = true;
+      return;
+    }
+
+    outputs.forEach((item) => {
+      const row = document.createElement("article");
+      row.className = "activity-item";
+      const rawHref = item.toolRoute || (item.path || "").replace("/convert/", "/tool/");
+      const safeHref = /^\/tool\/[a-z0-9-]+$/.test(rawHref) ? rawHref : "/";
+      row.innerHTML = `
+        <div class="activity-item__main">
+          <span class="activity-item__badge">${escapeHtml(item.extension || "FILE")}</span>
+          <div class="activity-item__meta">
+            <strong>${escapeHtml(item.tool || "Document Tool")}</strong>
+            <span>${escapeHtml(item.filename || "Output file")}</span>
+          </div>
+        </div>
+        <div class="activity-item__actions">
+          <div class="activity-item__time">${formatRelativeTime(item.recordedAt)}</div>
+          <a class="activity-item__link" href="${escapeHtml(safeHref)}">Open tool</a>
+        </div>
+      `;
+      activityFeed.appendChild(row);
+    });
+
+    activityBoard.hidden = false;
+  }
+
+  function getSavedBatches() {
+    try {
+      const parsed = JSON.parse(localStorage.getItem("savedBatches") || "[]");
+      if (!Array.isArray(parsed)) return [];
+      return parsed.map(normalizeSavedBatch).filter(Boolean);
+    } catch (error) {
+      console.warn("Could not parse saved batches from localStorage.", error);
+      return [];
+    }
+  }
+
+  function setSavedBatches(items) {
+    localStorage.setItem("savedBatches", JSON.stringify(items.slice(0, 8)));
+  }
+
+  function sortSavedBatches(items) {
+    return [...items].sort((a, b) => {
+      if (Boolean(b.starred) !== Boolean(a.starred)) {
+        return Number(Boolean(b.starred)) - Number(Boolean(a.starred));
+      }
+      return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
+    });
+  }
+
+  function exportSavedBatchData() {
+    const payload = {
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      batches: getSavedBatches()
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    const stamp = new Date().toISOString().slice(0, 10);
+    link.href = url;
+    link.download = `convertflow-batches-${stamp}.json`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  function mergeImportedSavedBatches(items) {
+    if (!Array.isArray(items) || !items.length) return;
+
+    const existing = getSavedBatches();
+    const map = new Map(existing.map((item) => [item.id, item]));
+    items.forEach((item) => {
+      const normalized = normalizeSavedBatch(item);
+      if (!normalized) return;
+      map.set(normalized.id, normalized);
+    });
+
+    setSavedBatches(sortSavedBatches(Array.from(map.values())));
+    renderSavedBatches();
+  }
+
+  function saveCurrentBatch() {
+    const outputs = JSON.parse(localStorage.getItem("recentOutputs") || "[]");
+    const usage = JSON.parse(localStorage.getItem("toolUsageStats") || "{}");
+    const recent = JSON.parse(localStorage.getItem("recentTools") || "[]");
+    const favorites = getFavorites();
+
+    if (!outputs.length && !recent.length && !favorites.length) {
+      return false;
+    }
+
+    const inferredTool = outputs[0]?.tool || recent[0]?.label || favorites[0]?.label || "Workspace";
+    const defaultName = `${inferredTool} Batch ${new Date().toLocaleDateString(undefined, {
+      month: "short",
+      day: "numeric"
+    })}`;
+    const batchName = window.prompt("Name this saved batch", defaultName)?.trim();
+    if (!batchName) {
+      return false;
+    }
+
+    const batch = {
+      id: String(Date.now()),
+      name: batchName,
+      createdAt: new Date().toISOString(),
+      outputs,
+      usage,
+      recent,
+      favorites
+    };
+
+    const batches = sortSavedBatches(getSavedBatches());
+    setSavedBatches([batch, ...batches]);
+    return true;
+  }
+
+  function renameSavedBatch(batchId) {
+    const batches = sortSavedBatches(getSavedBatches());
+    const existing = batches.find((item) => item.id === batchId);
+    if (!existing) return;
+
+    const nextName = window.prompt("Rename this saved batch", existing.name)?.trim();
+    if (!nextName) return;
+
+    setSavedBatches(batches.map((item) => (
+      item.id === batchId ? { ...item, name: nextName } : item
+    )));
+    renderSavedBatches();
+  }
+
+  function toggleSavedBatchStar(batchId) {
+    const batches = sortSavedBatches(getSavedBatches());
+    setSavedBatches(batches.map((item) => (
+      item.id === batchId ? { ...item, starred: !item.starred } : item
+    )));
+    renderSavedBatches();
+  }
+
+  function editSavedBatchNote(batchId) {
+    const batches = getSavedBatches();
+    const existing = batches.find((item) => item.id === batchId);
+    if (!existing) return;
+
+    const promptResult = window.prompt("Add a note for this batch", existing.note || "");
+    if (promptResult === null) return;
+    const nextNote = promptResult.trim();
+
+    setSavedBatches(batches.map((item) => (
+      item.id === batchId ? { ...item, note: nextNote } : item
+    )));
+    renderSavedBatches();
+  }
+
+  function duplicateSavedBatch(batchId) {
+    const batches = getSavedBatches();
+    const existing = batches.find((item) => item.id === batchId);
+    if (!existing) return;
+
+    const duplicated = {
+      ...existing,
+      id: String(Date.now()),
+      name: existing.name + " Copy",
+      createdAt: new Date().toISOString(),
+      starred: false
+    };
+
+    setSavedBatches([duplicated, ...batches]);
+    renderSavedBatches();
+  }
+
+  function restoreSavedBatch(batchId) {
+    const batch = getSavedBatches().find((item) => item.id === batchId);
+    if (!batch) return;
+
+    localStorage.setItem("recentOutputs", JSON.stringify(batch.outputs || []));
+    localStorage.setItem("toolUsageStats", JSON.stringify(batch.usage || {}));
+    localStorage.setItem("recentTools", JSON.stringify(batch.recent || []));
+    localStorage.setItem("favoriteTools", JSON.stringify((batch.favorites || []).slice(0, 8)));
+
+    renderRecentTools();
+    renderFavoriteTools();
+    renderActivityBoard();
+    syncFavoriteButtons();
+  }
+
+  function getBatchOutputKey(item) {
+    return [item?.filename || "", item?.recordedAt || "", item?.extension || ""].join("|");
+  }
+
+  function togglePinnedBatchOutput(batchId, outputKey) {
+    const batches = getSavedBatches();
+    const next = batches.map((batch) => {
+      if (batch.id !== batchId) return batch;
+      const pinnedOutputs = Array.isArray(batch.pinnedOutputs) ? [...batch.pinnedOutputs] : [];
+      const exists = pinnedOutputs.includes(outputKey);
+      return {
+        ...batch,
+        pinnedOutputs: exists
+          ? pinnedOutputs.filter((item) => item !== outputKey)
+          : [outputKey, ...pinnedOutputs]
+      };
+    });
+
+    setSavedBatches(next);
+    renderSavedBatches();
+    openBatchDetails(batchId);
+  }
+
+  function closeBatchDetails() {
+    if (!batchModal) return;
+    batchModal.hidden = true;
+    batchModal.setAttribute("aria-hidden", "true");
+    batchModal.style.display = "none";
+    document.body.classList.remove("batch-modal-open");
+  }
+
+  function openBatchDetails(batchId) {
+    if (!batchModal || !batchModalTitle || !batchModalMeta || !batchModalStats || !batchModalOutputs || !batchModalActions) return;
+
+    const batch = getSavedBatches().find((item) => item.id === batchId);
+    if (!batch) return;
+
+    const usageEntries = Object.entries(batch.usage || {}).sort((a, b) => b[1] - a[1]);
+    const topTool = formatToolRouteLabel(usageEntries[0]?.[0]);
+    const outputCount = (batch.outputs || []).length;
+    const favoriteCount = (batch.favorites || []).length;
+    const recentCount = (batch.recent || []).length;
+    const pinnedOutputs = Array.isArray(batch.pinnedOutputs) ? batch.pinnedOutputs : [];
+    const orderedOutputs = [...(batch.outputs || [])].sort((a, b) => {
+      const aPinned = pinnedOutputs.includes(getBatchOutputKey(a));
+      const bPinned = pinnedOutputs.includes(getBatchOutputKey(b));
+      if (aPinned !== bPinned) return Number(bPinned) - Number(aPinned);
+      return 0;
+    });
+
+    batchModalTitle.textContent = batch.name;
+    batchModalMeta.innerHTML = `
+      <span>${batch.starred ? "Starred" : "Saved"} - ${formatRelativeTime(batch.createdAt)}</span>
+      <span>${escapeHtml(topTool)}</span>
+    `;
+    if (batchModalNote) {
+      if (batch.note) {
+        batchModalNote.hidden = false;
+        batchModalNote.textContent = batch.note;
+      } else {
+        batchModalNote.hidden = true;
+        batchModalNote.textContent = "";
+      }
+    }
+    batchModalStats.innerHTML = `
+      <article class="batch-modal__stat"><strong>${outputCount}</strong><span>outputs</span></article>
+      <article class="batch-modal__stat"><strong>${favoriteCount}</strong><span>pinned tools</span></article>
+      <article class="batch-modal__stat"><strong>${recentCount}</strong><span>recent routes</span></article>
+    `;
+    batchModalOutputs.innerHTML = orderedOutputs.length ? orderedOutputs.map((item, index) => {
+      const key = getBatchOutputKey(item);
+      const pinned = pinnedOutputs.includes(key);
+      return `
+      <article class="batch-output${index === 0 ? " batch-output--primary" : ""}${pinned ? " batch-output--pinned" : ""}">
+        <span class="batch-output__badge">${escapeHtml(item.extension || "FILE")}</span>
+        <div class="batch-output__meta">
+          <strong>${escapeHtml(item.filename || "Output file")}</strong>
+          <span>${escapeHtml(item.tool || "Document Tool")} - ${formatRelativeTime(item.recordedAt)}</span>
+        </div>
+        <button type="button" class="batch-output__pin" data-output-action="pin" data-batch-id="${batch.id}" data-output-key="${key}">
+          ${pinned ? "Pinned" : "Pin output"}
+        </button>
+      </article>
+    `;
+    }).join("") : `<p class="batch-modal__empty">No recent outputs were saved in this batch.</p>`;
+    batchModalActions.innerHTML = `
+      <button type="button" class="saved-batch__link" data-action="restore" data-batch-id="${batch.id}">Restore batch</button>
+      <button type="button" class="saved-batch__secondary" data-action="duplicate" data-batch-id="${batch.id}">Duplicate</button>
+      <button type="button" class="saved-batch__secondary" data-action="star" data-batch-id="${batch.id}">${batch.starred ? "Unstar" : "Star"}</button>
+      <button type="button" class="saved-batch__secondary" data-action="note" data-batch-id="${batch.id}">${batch.note ? "Edit note" : "Add note"}</button>
+      <button type="button" class="saved-batch__secondary" data-action="rename" data-batch-id="${batch.id}">Rename</button>
+    `;
+
+    batchModal.hidden = false;
+    batchModal.setAttribute("aria-hidden", "false");
+    batchModal.style.display = "grid";
+    document.body.classList.add("batch-modal-open");
+  }
+
+  function renderSavedBatches() {
+    if (!savedBatches || !savedBatchesList) return;
+
+    const batches = sortSavedBatches(getSavedBatches());
+
+    savedBatchesList.innerHTML = "";
+
+    if (!batches.length) {
+      savedBatches.hidden = true;
+      return;
+    }
+
+    batches.forEach((batch) => {
+      const usageEntries = Object.entries(batch.usage || {}).sort((a, b) => b[1] - a[1]);
+      const topTool = formatToolRouteLabel(usageEntries[0]?.[0]);
+      const outputCount = (batch.outputs || []).length;
+      const favoriteCount = (batch.favorites || []).length;
+      const pinnedOutputs = Array.isArray(batch.pinnedOutputs) ? batch.pinnedOutputs : [];
+      const orderedOutputs = [...(batch.outputs || [])].sort((a, b) => {
+        const aPinned = pinnedOutputs.includes(getBatchOutputKey(a));
+        const bPinned = pinnedOutputs.includes(getBatchOutputKey(b));
+        if (aPinned !== bPinned) return Number(bPinned) - Number(aPinned);
+        return 0;
+      });
+      const previewOutputs = orderedOutputs.slice(0, 3).map((item, index) => `
+        <span class="saved-batch__preview-chip${index === 0 ? " saved-batch__preview-chip--primary" : ""}${pinnedOutputs.includes(getBatchOutputKey(item)) ? " saved-batch__preview-chip--pinned" : ""}">
+          <strong>${escapeHtml(item.extension || "FILE")}</strong>
+          <span>${escapeHtml(item.filename || "Output file")}</span>
+        </span>
+      `).join("");
+      const card = document.createElement("article");
+      card.className = "saved-batch";
+      card.innerHTML = `
+        <div class="saved-batch__meta">
+          <p class="saved-batch__eyebrow">${batch.starred ? "Starred batch - " : ""}${formatRelativeTime(batch.createdAt)}</p>
+          <strong>${escapeHtml(batch.name)}</strong>
+          <span>${escapeHtml(topTool)} - ${outputCount} output${outputCount === 1 ? "" : "s"} - ${favoriteCount} pinned</span>
+          ${batch.note ? `<p class="saved-batch__note">${escapeHtml(batch.note)}</p>` : ""}
+          ${previewOutputs ? `<div class="saved-batch__preview">${previewOutputs}</div>` : ""}
+        </div>
+        <div class="saved-batch__actions">
+          <button type="button" class="saved-batch__link" data-action="details" data-batch-id="${batch.id}">Details</button>
+          <button type="button" class="saved-batch__secondary" data-action="restore" data-batch-id="${batch.id}">Restore</button>
+          <button type="button" class="saved-batch__secondary" data-action="duplicate" data-batch-id="${batch.id}">Duplicate</button>
+          <button type="button" class="saved-batch__secondary" data-action="star" data-batch-id="${batch.id}">${batch.starred ? "Unstar" : "Star"}</button>
+          <button type="button" class="saved-batch__remove" data-action="remove" data-batch-id="${batch.id}" aria-label="Remove saved batch">Remove</button>
+        </div>
+      `;
+      savedBatchesList.appendChild(card);
+    });
+
+    savedBatches.hidden = false;
+  }
+
+  function applyToolFilters() {
+    const query = (toolSearch?.value || "").trim().toLowerCase();
+    let visibleCardsTotal = 0;
+    let visibleCategories = 0;
+
+    categories.forEach((category) => {
+      const categoryName = category.dataset.category || "";
+      const matchesCategory = activeFilter === "all" || categoryName === activeFilter;
+      const cards = Array.from(category.querySelectorAll(".card"));
+      let visibleCards = 0;
+
+      cards.forEach((card) => {
+        if (card.hasAttribute("data-catalog-hidden")) { card.hidden = true; return; }
+        const text = (card.textContent || "").toLowerCase();
+        const keywords = (card.dataset.keywords || "").toLowerCase();
+        const matchesQuery = !query || text.includes(query) || keywords.includes(query);
+        const show = matchesCategory && matchesQuery;
+        card.hidden = !show;
+        if (show) visibleCards += 1;
+      });
+
+      category.hidden = visibleCards === 0;
+      if (visibleCards > 0) {
+        visibleCardsTotal += visibleCards;
+        visibleCategories += 1;
+      }
+    });
+
+    if (toolBrowserCount) {
+      const toolLabel = visibleCardsTotal === 1 ? "tool" : "tools";
+      const categoryLabel = visibleCategories === 1 ? "section" : "sections";
+      toolBrowserCount.textContent = visibleCardsTotal
+        ? `${visibleCardsTotal} ${toolLabel} across ${visibleCategories} ${categoryLabel}`
+        : "0 tools";
+    }
+
+    if (toolEmptyState) {
+      toolEmptyState.hidden = visibleCardsTotal !== 0;
+    }
+  }
+
+  function clearToolSearch() {
+    if (!toolSearch) return;
+    toolSearch.value = "";
+    applyToolFilters();
+  }
+
+  filterChips.forEach((chip) => {
+    chip.addEventListener("click", () => {
+      const clicked = chip.dataset.filter || "all";
+      // Clicking an already-active non-All chip toggles back to All
+      if (activeFilter === clicked && clicked !== "all") {
+        activeFilter = "all";
+      } else {
+        activeFilter = clicked;
+      }
+      filterChips.forEach((item) => item.classList.toggle("is-active", item.dataset.filter === activeFilter));
+      applyToolFilters();
+    });
+  });
+
+  filterShortcuts.forEach((shortcut) => {
+    shortcut.addEventListener("click", () => {
+      const filter = shortcut.dataset.filterShortcut || "all";
+      activeFilter = filter;
+      filterChips.forEach((item) => item.classList.toggle("is-active", item.dataset.filter === filter));
+      applyToolFilters();
+      toolSearch?.scrollIntoView({ behavior: "smooth", block: "center" });
+      toolSearch?.focus();
+    });
+  });
+
+  if (toolSearch) {
+    toolSearch.addEventListener("input", applyToolFilters);
+  }
+
+  if (clearRecentTools) {
+    clearRecentTools.addEventListener("click", () => {
+      localStorage.removeItem("recentTools");
+      renderRecentTools();
+    });
+  }
+
+  if (clearFavoriteTools) {
+    clearFavoriteTools.addEventListener("click", () => {
+      localStorage.removeItem("favoriteTools");
+      renderFavoriteTools();
+      syncFavoriteButtons();
+    });
+  }
+
+  if (clearRecentOutputs) {
+    clearRecentOutputs.addEventListener("click", () => {
+      localStorage.removeItem("recentOutputs");
+      localStorage.removeItem("toolUsageStats");
+      renderActivityBoard();
+    });
+  }
+
+  if (saveBatchButton) {
+    saveBatchButton.addEventListener("click", () => {
+      if (!saveCurrentBatch()) return;
+      renderSavedBatches();
+    });
+  }
+
+  if (clearSavedBatches) {
+    clearSavedBatches.addEventListener("click", () => {
+      localStorage.removeItem("savedBatches");
+      renderSavedBatches();
+    });
+  }
+
+  if (exportSavedBatches) {
+    exportSavedBatches.addEventListener("click", () => {
+      if (!getSavedBatches().length) return;
+      exportSavedBatchData();
+    });
+  }
+
+  if (importSavedBatches && savedBatchesFile) {
+    importSavedBatches.addEventListener("click", () => {
+      savedBatchesFile.click();
+    });
+
+    savedBatchesFile.addEventListener("change", async () => {
+      const file = savedBatchesFile.files?.[0];
+      if (!file) return;
+
+      try {
+        const raw = await file.text();
+        const parsed = JSON.parse(raw);
+        const items = Array.isArray(parsed) ? parsed : parsed?.batches;
+        mergeImportedSavedBatches(items);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        savedBatchesFile.value = "";
+      }
+    });
+  }
+
+  document.addEventListener("click", (event) => {
+    const button = event.target.closest(".favorite-toggle");
+    if (button) {
+      event.preventDefault();
+      event.stopPropagation();
+
+      const path = button.dataset.path || "";
+      const label = button.dataset.label || path;
+      const favorites = getFavorites();
+      const exists = favorites.some((item) => item.path === path);
+      const next = exists
+        ? favorites.filter((item) => item.path !== path)
+        : [{ path, label }, ...favorites];
+
+      setFavorites(next);
+      renderFavoriteTools();
+      syncFavoriteButtons();
+      return;
+    }
+
+    const outputActionButton = event.target.closest("[data-output-action]");
+    if (outputActionButton) {
+      const batchId = outputActionButton.dataset.batchId;
+      const outputKey = outputActionButton.dataset.outputKey;
+      const outputAction = outputActionButton.dataset.outputAction;
+      if (batchId && outputKey && outputAction === "pin") {
+        togglePinnedBatchOutput(batchId, outputKey);
+      }
+      return;
+    }
+
+    const savedBatchButton = event.target.closest("[data-action]");
+    if (!savedBatchButton) return;
+
+    const batchId = savedBatchButton.dataset.batchId;
+    const action = savedBatchButton.dataset.action;
+    if (!batchId || !action) return;
+
+    if (action === "restore") {
+      restoreSavedBatch(batchId);
+      return;
+    }
+
+    if (action === "rename") {
+      renameSavedBatch(batchId);
+      openBatchDetails(batchId);
+      return;
+    }
+
+    if (action === "details") {
+      openBatchDetails(batchId);
+      return;
+    }
+
+    if (action === "star") {
+      toggleSavedBatchStar(batchId);
+      openBatchDetails(batchId);
+      return;
+    }
+
+    if (action === "duplicate") {
+      duplicateSavedBatch(batchId);
+      return;
+    }
+
+    if (action === "note") {
+      editSavedBatchNote(batchId);
+      openBatchDetails(batchId);
+      return;
+    }
+
+    if (action === "remove") {
+      const next = getSavedBatches().filter((item) => item.id !== batchId);
+      setSavedBatches(next);
+      renderSavedBatches();
+      closeBatchDetails();
+    }
+  });
+
+  document.addEventListener("click", (event) => {
+    if (!event.target.closest("[data-batch-modal-close]")) return;
+    closeBatchDetails();
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (!toolSearch) return;
+
+    if (event.key === "/" && !event.ctrlKey && !event.metaKey && !event.altKey) {
+      const target = event.target;
+      const isTyping =
+        target &&
+        (target.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName));
+
+      if (!isTyping || target !== toolSearch) {
+        event.preventDefault();
+        toolSearch.focus();
+        toolSearch.select();
+      }
+      return;
+    }
+
+    if (event.key === "Escape" && document.activeElement === toolSearch && toolSearch.value) {
+      clearToolSearch();
+      return;
+    }
+
+    if (event.key === "Escape" && batchModal && !batchModal.hidden) {
+      closeBatchDetails();
+      return;
+    }
+
+    if (["ArrowRight", "ArrowLeft", "ArrowDown", "ArrowUp"].includes(event.key)) {
+      const target = event.target;
+      const isTyping =
+        target &&
+        (target.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName));
+
+      if (isTyping) return;
+
+      const cards = getVisibleToolCards();
+      if (!cards.length) return;
+
+      const activeIndex = cards.indexOf(document.activeElement);
+      let nextIndex = activeIndex;
+
+      if (event.key === "ArrowRight" || event.key === "ArrowDown") {
+        nextIndex = activeIndex === -1 ? 0 : Math.min(activeIndex + 1, cards.length - 1);
+      } else if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
+        nextIndex = activeIndex === -1 ? cards.length - 1 : Math.max(activeIndex - 1, 0);
+      }
+
+      event.preventDefault();
+      cards[nextIndex].focus();
+    }
+  });
+
+  ensureFavoriteButtons();
+  applyToolFilters();
+  renderRecentTools();
+  renderFavoriteTools();
+  renderActivityBoard();
+  renderSavedBatches();
+</script>
+
+<script type="module" src="/static/home-scene.js"></script>
+{% endblock %}

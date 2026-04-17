@@ -1,0 +1,543 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}ConvertFlow | Local-First Document Workspace{% endblock %}</title>
+  <meta name="theme-color" content="#0e0e10">
+  <meta name="description" content="Free PDF tools — merge, compress, convert, sign. No upload limits. AI-powered.">
+  <meta property="og:title" content="ConvertFlow — PDF Tools That Work">
+  <meta property="og:description" content="30 PDF tools, free forever. No account required.">
+  <meta property="og:type" content="website">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+  <link rel="stylesheet" href="/static/styles.css?v=20260411b">
+</head>
+<body>
+  <div class="bg-layer" aria-hidden="true">
+    <div class="bg-blob"></div>
+    <div class="bg-blob"></div>
+    <div class="bg-blob"></div>
+  </div>
+  <div class="toast-container" id="toast-container" aria-live="polite" aria-atomic="true"></div>
+  <div class="shell shell--header">
+    <header class="site-header">
+      <a class="logo" href="/">
+        <span class="logo-mark">
+          <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <circle cx="10" cy="10" r="8.25" stroke="rgba(14,14,16,.24)" stroke-width="1.2"/>
+            <path d="M4.75 10h10.5M11.75 6.75L15 10l-3.25 3.25M8.25 13.25L5 10l3.25-3.25" stroke="#0e0e10" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+        <span class="logo-copy">
+          <strong>Convert<span>Flow</span></strong>
+          <small>Local-first document workspace</small>
+        </span>
+      </a>
+      <nav class="site-nav">
+        <a
+          href="/tool/merge-pdf"
+          class="{% if request.url.path in ['/tool/merge-pdf', '/tool/split-pdf', '/tool/extract-pages', '/tool/remove-pages', '/tool/rotate-pdf', '/tool/organize-pdf', '/tool/compress-pdf', '/tool/repair-pdf'] %}is-active{% endif %}"
+        >Prepare</a>
+        <a
+          href="/tool/images-to-pdf"
+          class="{% if request.url.path in ['/tool/images-to-pdf', '/tool/word-to-pdf', '/tool/pptx-to-pdf', '/tool/excel-to-pdf', '/tool/html-to-pdf', '/tool/pdf-to-word', '/tool/pdf-to-text', '/tool/pdf-to-images', '/tool/pdf-to-svg', '/tool/pdf-to-excel', '/tool/pdf-to-pptx', '/tool/pdf-to-pdfa'] %}is-active{% endif %}"
+        >Convert</a>
+        <a
+          href="/tool/image-to-doc"
+          class="{% if request.url.path in ['/tool/image-to-doc', '/tool/summarize-pdf', '/tool/translate-pdf'] %}is-active{% endif %}"
+        >Recover</a>
+        <a
+          href="/tool/edit-pdf"
+          class="{% if request.url.path in ['/tool/edit-pdf', '/tool/add-page-numbers', '/tool/watermark-pdf', '/tool/crop-pdf', '/tool/redact-pdf', '/tool/compare-pdf', '/tool/sign-pdf', '/tool/protect-pdf', '/tool/unlock-pdf'] %}is-active{% endif %}"
+        >Finalize</a>
+        <a
+          href="/#workspace-memory"
+          class="{% if request.url.path == '/' %}is-active{% endif %}"
+        >Workspace</a>
+        {% if saas_mode %}
+        <a
+          href="/pricing"
+          class="{% if request.url.path == '/pricing' %}is-active{% endif %}"
+        >Pricing</a>
+        {% endif %}
+      </nav>
+      {% if saas_mode %}
+      <div class="site-header__auth">
+        {% if request.state.current_user %}
+          <a href="/dashboard" class="plan-badge plan-badge--{{ request.state.current_user.plan }}" title="Open dashboard">
+            {{ request.state.current_user.plan | capitalize }}
+          </a>
+          <a href="/dashboard" class="auth-email">{{ request.state.current_user.email }}</a>
+          <form method="post" action="/auth/logout" style="display:inline">
+            <button type="submit" class="btn-link">Sign out</button>
+          </form>
+        {% else %}
+          <a href="/auth/login" class="btn-link">Sign in</a>
+          <a href="/auth/signup" class="btn btn--xs">Sign up free</a>
+        {% endif %}
+      </div>
+      {% endif %}
+    </header>
+  </div>
+
+  <div class="status-banner" id="status-banner" hidden>
+    <div class="status-banner__inner">
+      <strong id="status-title">Ready</strong>
+      <span id="status-message">Your document tools are ready.</span>
+      <button type="button" class="status-banner__close" id="status-close" aria-label="Dismiss status">&times;</button>
+    </div>
+  </div>
+
+  <nav class="mobile-dock" aria-label="Mobile navigation">
+    <a class="mobile-dock__item {% if request.url.path in ['/tool/merge-pdf', '/tool/split-pdf', '/tool/extract-pages', '/tool/remove-pages', '/tool/rotate-pdf', '/tool/organize-pdf', '/tool/compress-pdf', '/tool/repair-pdf'] %}is-active{% endif %}" href="/tool/merge-pdf">
+      <span class="mobile-dock__icon">Prep</span>
+      <span class="mobile-dock__label">Prepare</span>
+    </a>
+    <a class="mobile-dock__item {% if request.url.path in ['/tool/images-to-pdf', '/tool/word-to-pdf', '/tool/pptx-to-pdf', '/tool/excel-to-pdf', '/tool/html-to-pdf', '/tool/pdf-to-word', '/tool/pdf-to-text', '/tool/pdf-to-images', '/tool/pdf-to-svg', '/tool/pdf-to-excel', '/tool/pdf-to-pptx', '/tool/pdf-to-pdfa'] %}is-active{% endif %}" href="/tool/images-to-pdf">
+      <span class="mobile-dock__icon">Conv</span>
+      <span class="mobile-dock__label">Convert</span>
+    </a>
+    <a class="mobile-dock__item {% if request.url.path in ['/tool/image-to-doc', '/tool/summarize-pdf', '/tool/translate-pdf'] %}is-active{% endif %}" href="/tool/image-to-doc">
+      <span class="mobile-dock__icon">Recover</span>
+      <span class="mobile-dock__label">Recover</span>
+    </a>
+    <a class="mobile-dock__item {% if request.url.path in ['/tool/edit-pdf', '/tool/add-page-numbers', '/tool/watermark-pdf', '/tool/crop-pdf', '/tool/redact-pdf', '/tool/compare-pdf', '/tool/sign-pdf', '/tool/protect-pdf', '/tool/unlock-pdf'] %}is-active{% endif %}" href="/tool/edit-pdf">
+      <span class="mobile-dock__icon">Final</span>
+      <span class="mobile-dock__label">Finalize</span>
+    </a>
+  </nav>
+
+  <main class="shell shell--content">
+    {% block content %}{% endblock %}
+
+    {% if request.url.path.startswith('/tool/') %}
+    <section class="workspace-band">
+      <div class="workspace-band__copy">
+        <strong>ConvertFlow workspace</strong>
+        <span>Document conversion, cleanup, recovery, and final delivery from one local-first workspace with reusable memory.</span>
+      </div>
+      <div class="workspace-band__pills">
+        <span>Built for business documents</span>
+        <span>Recent tools and saved batches stay close</span>
+      </div>
+    </section>
+
+    <section class="process-strip">
+      <div class="process-card">
+        <strong>1. Upload</strong>
+        <span>Bring in the document, scan, or file batch you need to finish.</span>
+      </div>
+      <div class="process-card">
+        <strong>2. Process locally</strong>
+        <span>Core workflows run on your machine, with optional cloud engines only when you explicitly choose them.</span>
+      </div>
+      <div class="process-card">
+        <strong>3. Download fast</strong>
+        <span>Download the finished file without bouncing across separate single-purpose tools.</span>
+      </div>
+    </section>
+
+    <section class="trust-strip">
+      <div class="trust-pill">Local-first processing</div>
+      <div class="trust-pill">Optional cloud assist only when selected</div>
+      <div class="trust-pill">Built for messy PDFs, scans, and office files</div>
+    </section>
+    {% endif %}
+  </main>
+
+  <footer class="site-footer">
+    <p>Core workflows run on your machine. Cloud OCR or AI engines are used only when you select them.</p>
+  </footer>
+
+  <script>
+    function isTypingTarget(target) {
+      if (!target) return false;
+      if (target.isContentEditable) return true;
+      return ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName);
+    }
+
+    function focusFirstUploadInput() {
+      const input = document.querySelector('form .upload input[type="file"], form input[type="file"]');
+      if (!input) return false;
+      input.click();
+      return true;
+    }
+
+    function updateUploadLabel(input) {
+      const label = input.closest('.upload');
+      const strong = label && label.querySelector('strong');
+      if (!strong) return;
+      const count = input.files.length;
+      strong.textContent = count === 0
+        ? 'Choose file'
+        : count === 1
+          ? input.files[0].name
+          : `${count} files selected`;
+      label.classList.toggle('has-file', count > 0);
+    }
+
+    function getToolProgressCopy(form) {
+      const path = new URL(form.action, window.location.origin).pathname;
+      const button = form.querySelector('button[type="submit"]');
+      const buttonText = (button?.textContent || '').trim().toLowerCase();
+
+      const actionMap = {
+        '/convert/merge-pdf': 'Merge PDFs',
+        '/convert/split-pdf': 'Split PDF',
+        '/convert/extract-pages': 'Extract pages',
+        '/convert/remove-pages': 'Remove pages',
+        '/convert/rotate-pdf': 'Rotate PDF',
+        '/convert/compress-pdf': 'Compress PDF',
+        '/convert/repair-pdf': 'Repair PDF',
+        '/convert/protect-pdf': 'Protect PDF',
+        '/convert/unlock-pdf': 'Unlock PDF',
+        '/convert/add-page-numbers': 'Add page numbers',
+        '/convert/watermark-pdf': 'Apply watermark',
+        '/convert/images-to-pdf': 'Create PDF',
+        '/convert/word-to-pdf': 'Convert to PDF',
+        '/convert/pdf-to-word': 'Convert to Word',
+        '/convert/pdf-to-text': 'Extract text',
+        '/convert/pdf-to-images': 'Export images',
+        '/convert/pdf-to-svg': 'Export SVG',
+        '/convert/pdf-to-excel': 'Convert to Excel',
+        '/convert/pdf-to-pptx': 'Convert to PowerPoint',
+        '/convert/pdf-to-pdfa': 'Convert to PDF/A',
+        '/convert/image-to-doc': 'Recover scanned files'
+      };
+
+      const action = actionMap[path]
+        || (buttonText.startsWith('extract') ? 'Extract file' : null)
+        || (buttonText.startsWith('merge') ? 'Merge files' : null)
+        || (buttonText.startsWith('protect') ? 'Protect file' : null)
+        || (buttonText.startsWith('unlock') ? 'Unlock file' : null)
+        || (buttonText.startsWith('repair') ? 'Repair file' : null)
+        || (buttonText.startsWith('compress') ? 'Compress file' : null)
+        || (buttonText.startsWith('convert') ? 'Convert file' : null)
+        || 'Process file';
+
+      return {
+        idle: `Preparing to ${action.toLowerCase()}...`,
+        loading: `${action}...`,
+        working: `${action} in progress...`,
+        success: `${action} complete`,
+        failure: `${action} failed`
+      };
+    }
+
+    function ensureProgressUI(form) {
+      let wrap = form.querySelector('.progress-wrap');
+      if (wrap) return wrap;
+
+      const copy = getToolProgressCopy(form);
+      wrap = document.createElement('div');
+      wrap.className = 'progress-wrap';
+      wrap.innerHTML = `
+        <div class="progress-bar-bg" aria-hidden="true">
+          <div class="progress-bar-fill"></div>
+        </div>
+        <div class="progress-info" aria-live="polite">
+          <span class="label">${copy.idle}</span>
+          <span class="pct">0%</span>
+        </div>
+      `;
+      form.appendChild(wrap);
+      return wrap;
+    }
+
+    function updateProgressUI(form, value, label) {
+      const wrap = ensureProgressUI(form);
+      const fill = wrap.querySelector('.progress-bar-fill');
+      const labelNode = wrap.querySelector('.label');
+      const pctNode = wrap.querySelector('.pct');
+      wrap.classList.add('active');
+      if (fill) fill.style.width = `${value}%`;
+      if (labelNode && label) labelNode.textContent = label;
+      if (pctNode) pctNode.textContent = `${Math.round(value)}%`;
+    }
+
+    function setProgressState(form, state) {
+      const wrap = ensureProgressUI(form);
+      if (!wrap) return;
+      if (state) {
+        wrap.dataset.state = state;
+      } else {
+        delete wrap.dataset.state;
+      }
+    }
+
+    function hideProgressUI(form) {
+      const wrap = form.querySelector('.progress-wrap');
+      if (!wrap) return;
+      wrap.classList.remove('active');
+      delete wrap.dataset.state;
+    }
+
+    let _statusDismissTimer = null;
+
+    function showStatus(type, title, message) {
+      const banner = document.getElementById('status-banner');
+      const titleNode = document.getElementById('status-title');
+      const messageNode = document.getElementById('status-message');
+      if (!banner || !titleNode || !messageNode) return;
+      banner.hidden = false;
+      banner.dataset.state = type;
+      titleNode.textContent = title;
+      messageNode.textContent = message;
+      clearTimeout(_statusDismissTimer);
+      if (type === 'success') {
+        _statusDismissTimer = setTimeout(hideStatus, 5000);
+      }
+    }
+
+    function hideStatus() {
+      const banner = document.getElementById('status-banner');
+      if (!banner) return;
+      banner.hidden = true;
+      banner.dataset.state = '';
+    }
+
+    function emitSceneEvent(name, detail = {}) {
+      document.dispatchEvent(new CustomEvent(name, { detail }));
+    }
+
+    function parseFilename(response) {
+      const disposition = response.headers.get('content-disposition') || '';
+      const match = disposition.match(/filename=\"?([^\";]+)\"?/i);
+      return match ? match[1] : 'download.bin';
+    }
+
+    function getToolLabelForPath(pathname) {
+      const labels = {
+        '/convert/merge-pdf': 'Merge PDF',
+        '/convert/split-pdf': 'Split PDF',
+        '/convert/extract-pages': 'Extract Pages',
+        '/convert/remove-pages': 'Remove Pages',
+        '/convert/rotate-pdf': 'Rotate PDF',
+        '/convert/compress-pdf': 'Compress PDF',
+        '/convert/repair-pdf': 'Repair PDF',
+        '/convert/protect-pdf': 'Protect PDF',
+        '/convert/unlock-pdf': 'Unlock PDF',
+        '/convert/add-page-numbers': 'Add Page Numbers',
+        '/convert/watermark-pdf': 'Watermark PDF',
+        '/convert/images-to-pdf': 'Images to PDF',
+        '/convert/word-to-pdf': 'Word to PDF',
+        '/convert/pdf-to-word': 'PDF to Word',
+        '/convert/pdf-to-text': 'PDF to Text',
+        '/convert/pdf-to-images': 'PDF to Images',
+        '/convert/pdf-to-svg': 'PDF to SVG',
+        '/convert/pdf-to-excel': 'PDF to Excel',
+        '/convert/pdf-to-pptx': 'PDF to PowerPoint',
+        '/convert/pdf-to-pdfa': 'PDF to PDF/A',
+        '/convert/image-to-doc': 'Recover Scanned Files'
+      };
+      return labels[pathname] || 'Document Tool';
+    }
+
+    function recordRecentOutput(form, filename) {
+      const path = new URL(form.action, window.location.origin).pathname;
+      const toolRoute = path.replace('/convert/', '/tool/');
+      const extension = (filename.split('.').pop() || '').toUpperCase();
+      const nextItem = {
+        tool: getToolLabelForPath(path),
+        filename,
+        path,
+        toolRoute,
+        extension,
+        recordedAt: new Date().toISOString()
+      };
+
+      const items = JSON.parse(localStorage.getItem('recentOutputs') || '[]');
+      localStorage.setItem('recentOutputs', JSON.stringify([nextItem, ...items].slice(0, 8)));
+
+      const usage = JSON.parse(localStorage.getItem('toolUsageStats') || '{}');
+      usage[path] = (usage[path] || 0) + 1;
+      localStorage.setItem('toolUsageStats', JSON.stringify(usage));
+    }
+
+    async function submitFormWithDownload(form, copy) {
+      const formData = new FormData(form);
+      const response = await fetch(form.action, {
+        method: form.method || 'POST',
+        body: formData
+      });
+
+      if (!response.ok) {
+        let detail = 'Something went wrong while processing your file.';
+        try {
+          const payload = await response.json();
+          detail = payload.detail || detail;
+        } catch {
+          const text = await response.text();
+          if (text) detail = text;
+        }
+        throw new Error(detail);
+      }
+
+      const blob = await response.blob();
+      const filename = parseFilename(response);
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement('a');
+      anchor.href = url;
+      anchor.download = filename;
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+
+      recordRecentOutput(form, filename);
+      emitSceneEvent('convertflow:tool-success', { filename, path: new URL(form.action, window.location.origin).pathname });
+      showStatus('success', copy.success, `${filename} is ready and the download has started.`);
+    }
+
+    // Loading state for all forms
+    document.addEventListener('DOMContentLoaded', () => {
+      const revealTargets = document.querySelectorAll(
+        '.stat-card, .launch-panel, .spotlight, .tool-category, .recent-tools, .favorites-tools, .empty-state, .panel, .tool-tips, .process-card, .trust-pill'
+      );
+
+      revealTargets.forEach((element, index) => {
+        element.classList.add('reveal-on-scroll');
+        element.style.setProperty('--reveal-delay', `${Math.min(index * 45, 280)}ms`);
+      });
+
+      if ('IntersectionObserver' in window) {
+        const revealObserver = new IntersectionObserver((entries, observer) => {
+          entries.forEach(entry => {
+            if (!entry.isIntersecting) return;
+            entry.target.classList.add('is-visible');
+            observer.unobserve(entry.target);
+          });
+        }, { threshold: 0.14, rootMargin: '0px 0px -8% 0px' });
+
+        revealTargets.forEach(element => revealObserver.observe(element));
+      } else {
+        revealTargets.forEach(element => element.classList.add('is-visible'));
+      }
+
+      if (window.location.pathname.startsWith('/tool/')) {
+        const recentTools = JSON.parse(localStorage.getItem('recentTools') || '[]');
+        const entry = {
+          path: window.location.pathname,
+          label: document.title.replace(/\s*[—-].*$/, '').trim()
+        };
+        const next = [entry, ...recentTools.filter(item => item.path !== entry.path)].slice(0, 5);
+        localStorage.setItem('recentTools', JSON.stringify(next));
+      }
+
+      const close = document.getElementById('status-close');
+      if (close) close.addEventListener('click', hideStatus);
+
+      document.querySelectorAll('form').forEach(form => {
+        form.addEventListener('submit', async e => {
+          e.preventDefault();
+          const btn = form.querySelector('button[type="submit"]');
+          if (!btn) return;
+          const copy = getToolProgressCopy(form);
+          emitSceneEvent('convertflow:tool-submit', { path: new URL(form.action, window.location.origin).pathname });
+          hideStatus();
+          setProgressState(form, 'working');
+          updateProgressUI(form, 8, copy.idle);
+          btn.disabled = true;
+          btn.dataset.original = btn.textContent;
+          btn.innerHTML = `<span class="spinner"></span> ${copy.loading}`;
+          btn.classList.add('btn--loading');
+          let progressValue = 8;
+          const progressTimer = setInterval(() => {
+            progressValue = Math.min(progressValue + (progressValue < 50 ? 10 : 4), 92);
+            updateProgressUI(form, progressValue, copy.working);
+          }, 320);
+
+          try {
+            await submitFormWithDownload(form, copy);
+            clearInterval(progressTimer);
+            setProgressState(form, 'success');
+            updateProgressUI(form, 100, `${copy.success} - download starting...`);
+          } catch (error) {
+            clearInterval(progressTimer);
+            setProgressState(form, 'error');
+            updateProgressUI(form, 100, copy.failure);
+            emitSceneEvent('convertflow:tool-error', {
+              path: new URL(form.action, window.location.origin).pathname,
+              message: error.message || 'The request could not be completed.'
+            });
+            showStatus('error', copy.failure, error.message || 'The request could not be completed.');
+          } finally {
+            clearInterval(progressTimer);
+            btn.disabled = false;
+            btn.textContent = btn.dataset.original;
+            btn.classList.remove('btn--loading');
+            setTimeout(() => hideProgressUI(form), 1400);
+          }
+        });
+      });
+
+      // File input label feedback
+      document.querySelectorAll('.upload').forEach(label => {
+        const input = label.querySelector('input[type="file"]');
+        if (!input) return;
+
+        input.addEventListener('change', () => {
+          updateUploadLabel(input);
+          emitSceneEvent('convertflow:tool-files-selected', {
+            count: input.files ? input.files.length : 0
+          });
+        });
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+          label.addEventListener(eventName, event => {
+            event.preventDefault();
+            label.classList.add('drag-over');
+          });
+        });
+
+        ['dragleave', 'dragend'].forEach(eventName => {
+          label.addEventListener(eventName, event => {
+            if (event.relatedTarget && label.contains(event.relatedTarget)) {
+              return;
+            }
+            label.classList.remove('drag-over');
+          });
+        });
+
+        label.addEventListener('drop', event => {
+          event.preventDefault();
+          label.classList.remove('drag-over');
+          const files = event.dataTransfer && event.dataTransfer.files;
+          if (!files || !files.length) return;
+          input.files = files;
+          updateUploadLabel(input);
+          emitSceneEvent('convertflow:tool-files-selected', { count: files.length });
+          input.dispatchEvent(new Event('change', { bubbles: true }));
+        });
+      });
+
+      document.addEventListener('keydown', event => {
+        if (event.key === 'Escape') {
+          hideStatus();
+          return;
+        }
+
+        if (
+          window.location.pathname.startsWith('/tool/') &&
+          event.key.toLowerCase() === 'u' &&
+          !event.ctrlKey &&
+          !event.metaKey &&
+          !event.altKey &&
+          !isTypingTarget(event.target)
+        ) {
+          const opened = focusFirstUploadInput();
+          if (opened) {
+            event.preventDefault();
+          }
+        }
+      });
+    });
+  </script>
+  {% if request.url.path.startswith('/tool/') %}
+  <script type="module" src="/static/tool-scene-bootstrap.js"></script>
+  {% endif %}
+</body>
+</html>

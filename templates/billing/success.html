@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% block title %}Payment Successful — ConvertFlow{% endblock %}
+{% block content %}
+<section class="billing-result-shell">
+
+  <div class="billing-result-card billing-result-card--success">
+    <div class="billing-result-card__icon" aria-hidden="true">
+      <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" width="64" height="64">
+        <circle cx="32" cy="32" r="32" fill="rgba(34,197,94,.15)"/>
+        <circle cx="32" cy="32" r="24" fill="rgba(34,197,94,.2)"/>
+        <path d="M20 32l9 9 15-18" stroke="#22c55e" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+
+    <h1>You're on Pro!</h1>
+    <p class="billing-result-card__sub">
+      Your subscription is active. You now have unlimited conversions across all 30 tools and full AI-engine access.
+    </p>
+
+    <div class="billing-result-card__perks">
+      <div class="billing-result-card__perk">Unlimited conversions</div>
+      <div class="billing-result-card__perk">AI-powered tools (OCR, translate, summarise)</div>
+      <div class="billing-result-card__perk">Priority processing queue</div>
+    </div>
+
+    <div class="billing-result-card__actions">
+      <a href="/" class="btn">Start converting</a>
+      <a href="/dashboard" class="btn-link">Go to dashboard</a>
+    </div>
+  </div>
+
+</section>
+
+<style>
+.billing-result-shell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  padding: 3rem 1.5rem;
+}
+
+.billing-result-card {
+  max-width: 480px;
+  width: 100%;
+  background: var(--surface, rgba(255,255,255,.04));
+  border: 1px solid var(--border, rgba(255,255,255,.1));
+  border-radius: 1.25rem;
+  padding: 2.5rem 2rem;
+  text-align: center;
+}
+
+.billing-result-card--success {
+  border-color: rgba(34,197,94,.3);
+  box-shadow: 0 0 0 1px rgba(34,197,94,.2), 0 8px 32px rgba(34,197,94,.08);
+}
+
+.billing-result-card__icon {
+  margin: 0 auto 1.5rem;
+  width: 64px;
+  height: 64px;
+}
+
+.billing-result-card h1 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin: 0 0 .75rem;
+}
+
+.billing-result-card__sub {
+  color: var(--text-secondary, #888);
+  font-size: .95rem;
+  line-height: 1.6;
+  margin: 0 0 1.75rem;
+}
+
+.billing-result-card__perks {
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+  margin-bottom: 2rem;
+}
+
+.billing-result-card__perk {
+  font-size: .875rem;
+  padding: .5rem .875rem;
+  background: rgba(34,197,94,.08);
+  border: 1px solid rgba(34,197,94,.15);
+  border-radius: .5rem;
+  color: #4ade80;
+}
+
+.billing-result-card__actions {
+  display: flex;
+  flex-direction: column;
+  gap: .75rem;
+  align-items: center;
+}
+
+.billing-result-card__actions .btn {
+  width: 100%;
+  justify-content: center;
+}
+</style>
+{% endblock %}

@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+{% block title %}PowerPoint to PDF{% endblock %}
+{% block content %}
+<canvas id="pptx-to-pdf-scene" data-tool-scene aria-hidden="true"></canvas>
+<div class="tool-scene-vignette tool-scene-vignette--right" aria-hidden="true"></div>
+
+<section class="hero hero--tool">
+  <a class="back-link" href="/">
+    <svg viewBox="0 0 16 16" fill="none" style="width:14px;height:14px;vertical-align:-.15em"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    All tools
+  </a>
+  <p class="eyebrow">Convert documents</p>
+  <h1>Turn PowerPoint into <span class="highlight">a portable PDF.</span></h1>
+  <p class="lede">Upload a .pptx file and download a PDF. Use the PowerPoint engine for full visual fidelity — colors, images, fonts, and shapes all preserved.</p>
+</section>
+
+<div class="tool-layout">
+  <section class="panel">
+    <form class="form" action="/convert/pptx-to-pdf" method="post" enctype="multipart/form-data">
+      <div class="form-cluster">
+        <div class="form-cluster__header">
+          <p class="eyebrow">Input</p>
+          <span>Upload a <code>.pptx</code> file to convert to PDF.</span>
+        </div>
+        <label class="upload upload--drop">
+          <input type="file" name="file" accept=".pptx" required>
+          <div class="upload-inner">
+            <svg class="upload-icon" viewBox="0 0 48 48" fill="none"><rect x="8" y="12" width="32" height="26" rx="4" fill="#a24b2a" opacity=".1"/><rect x="8" y="12" width="32" height="26" rx="4" stroke="#a24b2a" stroke-width="1.8"/><path d="M24 20v12M20 24l4-4 4 4" stroke="#a24b2a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <strong>Choose a PowerPoint file or drag and drop</strong>
+            <span><code>.pptx</code> format only. Old <code>.ppt</code> files must be re-saved as <code>.pptx</code> first.</span>
+          </div>
+        </label>
+      </div>
+
+      <div class="form-cluster">
+        <div class="form-cluster__header">
+          <p class="eyebrow">Print options</p>
+        </div>
+        <div class="field-row">
+          <label class="field">
+            <span>Slides per page</span>
+            <select name="slides_per_page">
+              <option value="1" selected>1  — full page per slide</option>
+              <option value="2">2  — side by side</option>
+              <option value="4">4  — 2 × 2 grid</option>
+              <option value="6">6  — 2 × 3 grid</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>Orientation</span>
+            <select name="orientation">
+              <option value="landscape" selected>Landscape</option>
+              <option value="portrait">Portrait</option>
+            </select>
+          </label>
+        </div>
+      </div>
+
+      <div class="form-cluster">
+        <div class="form-cluster__header">
+          <p class="eyebrow">Engine</p>
+        </div>
+        <label class="field">
+          <span>Conversion engine</span>
+          <select name="engine">
+            <option value="powerpoint" selected>PowerPoint — full fidelity (colors, images, fonts)</option>
+            <option value="auto">auto — PowerPoint if available, else AI</option>
+            <option value="ollama">ollama — AI text layout</option>
+            <option value="github">github models — AI text layout</option>
+            <option value="basic">basic — plain text extraction</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="action-strip">
+        <div class="action-strip__copy">
+          <strong>Ready to convert?</strong>
+          <span>Exports your presentation with full fidelity — colors, images, fonts, and shapes preserved.</span>
+        </div>
+        <button type="submit">Convert and Download</button>
+      </div>
+    </form>
+  </section>
+
+  <aside class="tool-tips">
+    <div class="tool-tips__hero">
+      <p class="eyebrow">Workflow</p>
+      <h3>Best for sharing decks as fixed-layout documents.</h3>
+      <p>Use this when you want to send a presentation that can't be accidentally edited or reformatted.</p>
+    </div>
+    <div class="tool-tip-pills">
+      <span>Presentations</span>
+      <span>Decks</span>
+      <span>Slides</span>
+    </div>
+    <h3>Tips</h3>
+    <ul>
+      <li>Conversion uses Microsoft PowerPoint directly — all colors, fonts, shapes, images, logos, and backgrounds are preserved exactly as they appear on screen.</li>
+      <li>Only <code>.pptx</code> is supported. Re-save old <code>.ppt</code> files in PowerPoint first.</li>
+      <li>The output PDF matches your presentation's own slide dimensions, not a fixed paper size.</li>
+    </ul>
+  </aside>
+</div>
+
+<script type="module">
+import { THREE, createGlowSprite, mountToolScene } from "/static/tool-scene.js";
+
+mountToolScene({
+  canvasId: "pptx-to-pdf-scene",
+  setup({ scene, data }) {
+    const group = new THREE.Group();
+    group.position.set(5.2, 1.6, -6.4);
+    scene.add(group);
+
+    const mat = (opacity, color) => new THREE.LineBasicMaterial({ color, transparent: true, opacity });
+
+    // Source: wide slide (16:9ish)
+    const srcSlide = new THREE.Group();
+    srcSlide.position.set(-1.8, 0, 0);
+    const slideBorder = [[-1.7, 1.1], [1.7, 1.1], [1.7, -1.1], [-1.7, -1.1], [-1.7, 1.1]]
+      .map(([x, y]) => new THREE.Vector3(x, y, 0));
+    srcSlide.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(slideBorder), mat(0.16, 0xf0c060)));
+    // Title bar
+    const titleBar = [[-1.7, 1.1], [1.7, 1.1], [1.7, 0.5], [-1.7, 0.5], [-1.7, 1.1]]
+      .map(([x, y]) => new THREE.Vector3(x, y, 0.01));
+    srcSlide.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(titleBar), mat(0.1, 0xe8a838)));
+    // Content lines
+    [0.15, -0.2, -0.55, -0.82].forEach((y, i) => {
+      const w = i % 2 === 1 ? 2.4 : 2.8;
+      srcSlide.add(new THREE.Line(
+        new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-w / 2, y, 0.01), new THREE.Vector3(w / 2, y, 0.01)]),
+        mat(0.09, 0xf0ece4)
+      ));
+    });
+    group.add(srcSlide);
+
+    // Arrow
+    const arrowPts = [
+      new THREE.Vector3(-0.5, 0, 0), new THREE.Vector3(0.5, 0, 0),
+      new THREE.Vector3(0.2, 0.25, 0), new THREE.Vector3(0.5, 0, 0),
+      new THREE.Vector3(0.2, -0.25, 0),
+    ];
+    group.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(arrowPts), mat(0.18, 0xe8a838)));
+
+    // Target: PDF doc (portrait)
+    const pdfDoc = new THREE.Group();
+    pdfDoc.position.set(1.8, 0, 0);
+    const pdfBorder = [[-1.1, 1.7], [1.1, 1.7], [1.1, -1.7], [-1.1, -1.7], [-1.1, 1.7]]
+      .map(([x, y]) => new THREE.Vector3(x, y, 0));
+    pdfDoc.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pdfBorder), mat(0.2, 0xe8a838)));
+    group.add(pdfDoc);
+
+    const glow = createGlowSprite({ inner: "rgba(240,192,96,0.2)", middle: "rgba(232,168,56,0.08)", scale: 12 });
+    glow.position.copy(group.position);
+    scene.add(glow);
+
+    Object.assign(data, { group, glow });
+  },
+  frame({ camera, pointer, state, data }, elapsed) {
+    const { group, glow } = data;
+    if (!group) return;
+    camera.position.x = pointer.x * 0.35;
+    camera.position.y = -pointer.y * 0.25;
+    camera.lookAt(0, 0, -3);
+    group.rotation.y = Math.sin(elapsed * 0.28) * 0.08 + pointer.x * 0.04;
+    group.rotation.x = Math.sin(elapsed * 0.18) * 0.04;
+    group.position.y = 1.6 + Math.sin(elapsed * 0.6) * 0.1;
+    glow.position.copy(group.position);
+    glow.scale.setScalar(12 + state.energy * 1.5 + state.success * 1.6);
+    glow.material.opacity = 0.34 + state.energy * 0.18;
+  }
+});
+</script>
+{% endblock %}

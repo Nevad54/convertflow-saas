@@ -1,0 +1,29 @@
+.venv/
+.tmp/
+__pycache__/
+*.pyc
+*.pyo
+
+# Secrets — never commit
+.env
+.env.local
+
+# SQLite database
+*.db
+*.sqlite3
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Playwright MCP cache
+.playwright-mcp/
+
+# Local dev screenshots at repo root (static/ PNGs are fine)
+/edit-pdf-*.png
+/smoke-*.png
+/p7-*.png
+
+# Agent / tooling local state
+.claude/
+.pytest_cache/

@@ -1,0 +1,287 @@
+{% extends "base.html" %}
+{% block title %}Pricing — ConvertFlow{% endblock %}
+{% block content %}
+<section class="pricing-shell">
+
+  <div class="pricing-hero">
+    <h1>Simple, transparent pricing</h1>
+    <p class="pricing-hero__sub">Start for free. Upgrade when you need more.</p>
+  </div>
+
+  <div class="pricing-grid">
+
+    <!-- Free tier -->
+    <div class="pricing-card">
+      <div class="pricing-card__header">
+        <span class="pricing-card__tier">Free</span>
+        <div class="pricing-card__price">
+          <span class="pricing-card__amount">$0</span>
+          <span class="pricing-card__period">/ month</span>
+        </div>
+        <p class="pricing-card__tagline">Try all 30 tools, no credit card required.</p>
+      </div>
+
+      <ul class="pricing-card__features">
+        <li class="pricing-card__feature pricing-card__feature--yes">10 conversions per day</li>
+        <li class="pricing-card__feature pricing-card__feature--yes">All 30 PDF tools</li>
+        <li class="pricing-card__feature pricing-card__feature--yes">Basic conversion engines</li>
+        <li class="pricing-card__feature pricing-card__feature--no">AI-powered tools (OCR, summarise, translate)</li>
+        <li class="pricing-card__feature pricing-card__feature--no">Priority processing queue</li>
+        <li class="pricing-card__feature pricing-card__feature--no">Unlimited conversions</li>
+      </ul>
+
+      <div class="pricing-card__cta">
+        {% if user %}
+          <a href="/dashboard" class="btn btn--outline">Go to dashboard</a>
+        {% else %}
+          <a href="/auth/signup" class="btn btn--outline">Get started free</a>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Pro tier -->
+    <div class="pricing-card pricing-card--pro">
+      <div class="pricing-card__badge">Most popular</div>
+      <div class="pricing-card__header">
+        <span class="pricing-card__tier">Pro</span>
+        <div class="pricing-card__price">
+          <span class="pricing-card__amount">$12</span>
+          <span class="pricing-card__period">/ month</span>
+        </div>
+        <p class="pricing-card__tagline">Everything you need for heavy document work.</p>
+      </div>
+
+      <ul class="pricing-card__features">
+        <li class="pricing-card__feature pricing-card__feature--yes">Unlimited conversions</li>
+        <li class="pricing-card__feature pricing-card__feature--yes">All 30 PDF tools</li>
+        <li class="pricing-card__feature pricing-card__feature--yes">Basic conversion engines</li>
+        <li class="pricing-card__feature pricing-card__feature--yes">AI-powered tools (OCR, summarise, translate)</li>
+        <li class="pricing-card__feature pricing-card__feature--yes">Priority processing queue</li>
+        <li class="pricing-card__feature pricing-card__feature--yes">Cancel any time</li>
+      </ul>
+
+      <div class="pricing-card__cta">
+        {% if user and user.plan == "pro" %}
+          <a href="/dashboard" class="btn">Manage subscription</a>
+        {% else %}
+          <form method="POST" action="/billing/checkout">
+            <button type="submit" class="btn">Upgrade to Pro</button>
+          </form>
+        {% endif %}
+      </div>
+    </div>
+
+  </div>
+
+  <div class="pricing-faq">
+    <h2>Frequently asked questions</h2>
+    <dl class="pricing-faq__list">
+      <div class="pricing-faq__item">
+        <dt>Can I cancel my Pro subscription?</dt>
+        <dd>Yes — cancel any time from your dashboard. You'll keep Pro access until the end of your billing period.</dd>
+      </div>
+      <div class="pricing-faq__item">
+        <dt>What happens to my files?</dt>
+        <dd>Files are automatically deleted within 3 hours of conversion. We never store your documents long-term.</dd>
+      </div>
+      <div class="pricing-faq__item">
+        <dt>Do you offer refunds?</dt>
+        <dd>If you're not satisfied, contact us within 7 days of payment and we'll issue a full refund.</dd>
+      </div>
+      <div class="pricing-faq__item">
+        <dt>What payment methods do you accept?</dt>
+        <dd>All major credit and debit cards via Stripe. Apple Pay and Google Pay supported where available.</dd>
+      </div>
+    </dl>
+  </div>
+
+</section>
+
+<style>
+.pricing-shell {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 3rem 1.5rem 5rem;
+}
+
+.pricing-hero {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.pricing-hero h1 {
+  font-size: 2.25rem;
+  font-weight: 700;
+  margin: 0 0 .75rem;
+}
+
+.pricing-hero__sub {
+  font-size: 1.125rem;
+  color: var(--text-secondary, #888);
+  margin: 0;
+}
+
+.pricing-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  align-items: start;
+  margin-bottom: 4rem;
+}
+
+@media (max-width: 620px) {
+  .pricing-grid { grid-template-columns: 1fr; }
+}
+
+.pricing-card {
+  position: relative;
+  background: var(--surface, rgba(255,255,255,.04));
+  border: 1px solid var(--border, rgba(255,255,255,.1));
+  border-radius: 1rem;
+  padding: 2rem;
+}
+
+.pricing-card--pro {
+  border-color: var(--accent, #7c6af7);
+  box-shadow: 0 0 0 1px var(--accent, #7c6af7),
+              0 8px 32px rgba(124,106,247,.15);
+}
+
+.pricing-card__badge {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--accent, #7c6af7);
+  color: #fff;
+  font-size: .75rem;
+  font-weight: 600;
+  padding: .25rem .85rem;
+  border-radius: 99px;
+  letter-spacing: .04em;
+  white-space: nowrap;
+}
+
+.pricing-card__header {
+  margin-bottom: 1.5rem;
+}
+
+.pricing-card__tier {
+  display: block;
+  font-size: .875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--text-secondary, #888);
+  margin-bottom: .5rem;
+}
+
+.pricing-card__price {
+  display: flex;
+  align-items: baseline;
+  gap: .25rem;
+  margin-bottom: .5rem;
+}
+
+.pricing-card__amount {
+  font-size: 2.5rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.pricing-card__period {
+  font-size: .9rem;
+  color: var(--text-secondary, #888);
+}
+
+.pricing-card__tagline {
+  font-size: .9rem;
+  color: var(--text-secondary, #888);
+  margin: 0;
+}
+
+.pricing-card__features {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: .625rem;
+}
+
+.pricing-card__feature {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  font-size: .9rem;
+}
+
+.pricing-card__feature::before {
+  content: '';
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  border-radius: 50%;
+}
+
+.pricing-card__feature--yes::before {
+  background: url("data:image/svg+xml,%3Csvg viewBox='0 0 16 16' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='8' cy='8' r='8' fill='%2322c55e'/%3E%3Cpath d='M4.5 8l2.5 2.5 4.5-5' stroke='%23fff' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/cover no-repeat;
+}
+
+.pricing-card__feature--no::before {
+  background: url("data:image/svg+xml,%3Csvg viewBox='0 0 16 16' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='8' cy='8' r='8' fill='rgba(255%2C255%2C255%2C.1)'/%3E%3Cpath d='M5.5 10.5l5-5M10.5 10.5l-5-5' stroke='rgba(255%2C255%2C255%2C.3)' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E") center/cover no-repeat;
+}
+
+.pricing-card__feature--no {
+  color: var(--text-secondary, #888);
+}
+
+.pricing-card__cta .btn,
+.pricing-card__cta button.btn {
+  width: 100%;
+  text-align: center;
+  justify-content: center;
+}
+
+.pricing-card__cta form { margin: 0; }
+
+.btn--outline {
+  background: transparent;
+  border: 1px solid var(--border, rgba(255,255,255,.15));
+}
+
+/* FAQ */
+.pricing-faq {
+  border-top: 1px solid var(--border, rgba(255,255,255,.1));
+  padding-top: 3rem;
+}
+
+.pricing-faq h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0 0 2rem;
+  text-align: center;
+}
+
+.pricing-faq__list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.pricing-faq__item dt {
+  font-weight: 600;
+  margin-bottom: .35rem;
+}
+
+.pricing-faq__item dd {
+  margin: 0;
+  font-size: .9rem;
+  color: var(--text-secondary, #888);
+  line-height: 1.6;
+}
+</style>
+{% endblock %}

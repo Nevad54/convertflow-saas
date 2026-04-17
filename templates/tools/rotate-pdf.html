@@ -1,0 +1,150 @@
+﻿{% extends "base.html" %}
+{% block title %}Rotate PDF{% endblock %}
+{% block content %}
+<canvas id="rotate-pdf-scene" data-tool-scene aria-hidden="true"></canvas>
+<div class="tool-scene-vignette tool-scene-vignette--right" aria-hidden="true"></div>
+
+<section class="hero hero--tool">
+  <a class="back-link" href="/">
+    <svg viewBox="0 0 16 16" fill="none" style="width:14px;height:14px;vertical-align:-.15em"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    All tools
+  </a>
+  <p class="eyebrow">Prepare PDFs</p>
+  <h1>Rotate PDFs into the <span class="highlight">right orientation</span>.</h1>
+  <p class="lede">Fix upside-down or sideways documents by rotating every page to the angle you choose.</p>
+</section>
+
+<div class="tool-layout">
+  <section class="panel">
+    <form class="form" action="/convert/rotate-pdf" method="post" enctype="multipart/form-data">
+      <div class="form-cluster">
+        <div class="form-cluster__header">
+          <p class="eyebrow">Input</p>
+          <span>Upload the PDF you want to rotate.</span>
+        </div>
+        <label class="upload upload--drop">
+          <input type="file" name="file" accept=".pdf" required>
+          <div class="upload-inner">
+            <svg class="upload-icon" viewBox="0 0 48 48" fill="none"><rect x="8" y="12" width="32" height="26" rx="4" fill="#a24b2a" opacity=".1"/><rect x="8" y="12" width="32" height="26" rx="4" stroke="#a24b2a" stroke-width="1.8"/><path d="M24 20v12M20 24l4-4 4 4" stroke="#a24b2a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <strong>Choose a PDF file or drag and drop</strong>
+            <span>One PDF file only.</span>
+          </div>
+        </label>
+      </div>
+
+      <div class="form-cluster">
+        <div class="form-cluster__header">
+          <p class="eyebrow">Output</p>
+          <span>Pick the rotation that should apply to every page.</span>
+        </div>
+        <label class="field">
+          <span>Rotation angle</span>
+          <div class="radio-group">
+            <label class="radio-option">
+              <input type="radio" name="degrees" value="90" checked>
+              <span>90 degrees clockwise</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="degrees" value="180">
+              <span>180 degrees</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="degrees" value="270">
+              <span>270 degrees or 90 degrees counter-clockwise</span>
+            </label>
+          </div>
+        </label>
+      </div>
+
+      <div class="action-strip">
+        <div class="action-strip__copy">
+          <strong>Ready to rotate</strong>
+          <span>We'll apply the selected angle to the entire document and start the corrected PDF download.</span>
+        </div>
+        <button type="submit">Rotate and Download</button>
+      </div>
+    </form>
+  </section>
+
+  <aside class="tool-tips">
+    <div class="tool-tips__hero">
+      <p class="eyebrow">Workflow</p>
+      <h3>Use this for scanned pages, sideways exports, and upside-down documents.</h3>
+      <p>The chosen angle is applied consistently to all pages, which is ideal for uniform orientation fixes.</p>
+    </div>
+    <div class="tool-tip-pills">
+      <span>Scans</span>
+      <span>Sideways pages</span>
+      <span>Portrait fix</span>
+      <span>Uniform rotation</span>
+    </div>
+    <h3>Tips</h3>
+    <ul>
+      <li>Rotation applies to all pages in the document.</li>
+      <li>270 degrees gives the same result as rotating 90 degrees to the left.</li>
+    </ul>
+  </aside>
+</div>
+<script type="module">
+import { THREE, createGlowSprite, mountToolScene } from "/static/tool-scene.js";
+
+mountToolScene({
+  canvasId: "rotate-pdf-scene",
+  setup({ scene, data }) {
+    const group = new THREE.Group();
+    group.position.set(5.1, 1.5, -6.4);
+    scene.add(group);
+
+    const page = new THREE.Mesh(
+      new THREE.PlaneGeometry(3.4, 4.4),
+      new THREE.MeshBasicMaterial({ color: 0xf0ece4, transparent: true, opacity: 0.12, side: THREE.DoubleSide })
+    );
+    group.add(page);
+
+    // Corner accent lines
+    const edgeMat = new THREE.LineBasicMaterial({ color: 0xe8a838, transparent: true, opacity: 0.22 });
+    [
+      [[-1.7, 2.2, 0.01], [-1.7, -2.2, 0.01]],
+      [[-1.7, 2.2, 0.01], [1.7, 2.2, 0.01]],
+      [[1.7, -2.2, 0.01], [1.7, 2.2, 0.01]],
+      [[1.7, -2.2, 0.01], [-1.7, -2.2, 0.01]]
+    ].forEach(([a, b]) => {
+      group.add(new THREE.Line(
+        new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(...a), new THREE.Vector3(...b)]),
+        edgeMat
+      ));
+    });
+
+    // Rotation arc hint
+    const arcPts = Array.from({ length: 32 }, (_, i) => {
+      const a = (i / 31) * Math.PI * 1.5 - Math.PI * 0.75;
+      return new THREE.Vector3(Math.cos(a) * 2.7, Math.sin(a) * 2.7, 0.02);
+    });
+    group.add(new THREE.Line(
+      new THREE.BufferGeometry().setFromPoints(arcPts),
+      new THREE.LineBasicMaterial({ color: 0xe8a838, transparent: true, opacity: 0.16 })
+    ));
+
+    const glow = createGlowSprite({ inner: "rgba(232,168,56,0.18)", middle: "rgba(212,74,26,0.07)", scale: 10 });
+    glow.position.copy(group.position);
+    scene.add(glow);
+
+    Object.assign(data, { group, glow });
+  },
+  frame({ camera, pointer, state, data }, elapsed) {
+    const { group, glow } = data;
+    if (!group) return;
+    camera.position.x = pointer.x * 0.35;
+    camera.position.y = -pointer.y * 0.25;
+    camera.lookAt(0, 0, -3);
+    group.rotation.z = elapsed * (0.18 + state.energy * 0.18);
+    group.rotation.y = Math.sin(elapsed * 0.25) * 0.1;
+    group.position.y = 1.5 + Math.sin(elapsed * 0.6) * 0.1;
+    glow.position.copy(group.position);
+    glow.scale.setScalar(10 + state.energy * 1.2);
+    glow.material.opacity = 0.3 + state.energy * 0.16;
+  }
+});
+</script>
+{% endblock %}
+
