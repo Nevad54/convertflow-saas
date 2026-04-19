@@ -43,7 +43,9 @@
         <li>$12 / month — cancel any time</li>
       </ul>
     </div>
-    <a href="/billing/checkout" class="btn dash-upgrade-card__cta">Upgrade to Pro</a>
+    <form method="post" action="/billing/checkout">
+      <button type="submit" class="btn dash-upgrade-card__cta">Upgrade to Pro</button>
+    </form>
   </div>
 
   {% else %}
@@ -56,7 +58,9 @@
       Pro plan active
     </div>
     <p>Unlimited conversions — no daily cap.</p>
-    <a href="/billing/portal" class="btn-link">Manage subscription</a>
+    <form method="post" action="/billing/portal">
+      <button type="submit" class="btn-link">Manage subscription</button>
+    </form>
   </div>
   {% endif %}
 
