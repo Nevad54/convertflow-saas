@@ -87,13 +87,18 @@ def test_postgres_path_roundtrip(pg_models):
     by_id = m.get_user_by_id(u["id"])
     assert by_id is not None
     assert by_id["plan"] == "free"
+    assert by_id["stripe_customer_id"] is None
 
     # plan transitions (exercises COALESCE + placeholder rewrite in UPDATE)
     m.set_user_plan(u["id"], "pro", stripe_customer_id="cus_TEST")
-    assert m.get_user_by_id(u["id"])["plan"] == "pro"
+    upgraded = m.get_user_by_id(u["id"])
+    assert upgraded["plan"] == "pro"
+    assert upgraded["stripe_customer_id"] == "cus_TEST"
 
     m.set_plan_by_stripe_customer("cus_TEST", "free")
-    assert m.get_user_by_id(u["id"])["plan"] == "free"
+    downgraded = m.get_user_by_id(u["id"])
+    assert downgraded["plan"] == "free"
+    assert downgraded["stripe_customer_id"] == "cus_TEST"
 
     # conversion counting (exercises COUNT(*) AS n alias + date-range filter)
     assert m.count_conversions_today(u["id"]) == 0

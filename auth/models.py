@@ -174,7 +174,10 @@ def get_user_by_email(email: str) -> dict | None:
 def get_user_by_id(user_id: str) -> dict | None:
     with _conn() as conn:
         cur = conn.execute(
-            _q("SELECT id, email, plan FROM users WHERE id = ?"),
+            _q(
+                "SELECT id, email, plan, stripe_customer_id "
+                "FROM users WHERE id = ?"
+            ),
             (user_id,),
         )
         row = cur.fetchone()

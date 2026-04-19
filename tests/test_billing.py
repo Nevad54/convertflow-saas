@@ -98,6 +98,7 @@ def test_checkout_completed_upgrades_user(client, test_user):
     from auth.models import get_user_by_id
     updated = get_user_by_id(test_user["id"])
     assert updated["plan"] == "pro"
+    assert updated["stripe_customer_id"] == "cus_testABC"
 
 
 # ---------------------------------------------------------------------------
@@ -119,6 +120,7 @@ def test_subscription_deleted_downgrades_user(client, test_user):
     from auth.models import get_user_by_id
     updated = get_user_by_id(test_user["id"])
     assert updated["plan"] == "free"
+    assert updated["stripe_customer_id"] == "cus_testDEF"
 
 
 # ---------------------------------------------------------------------------
