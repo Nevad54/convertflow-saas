@@ -26,6 +26,7 @@ Move documents between PDF and editable business formats from one workspace.
 3. Keep output naming and attachment downloads consistent.
 4. Recommend local-first execution paths by default.
 5. Treat optional AI-assisted extraction as a capability choice inside the workflow, not as a separate product.
+6. When an image-to-PDF engine fails, log engine and input metadata for diagnosis while keeping the user-facing failure message stable.
 
 ## Output Rules
 

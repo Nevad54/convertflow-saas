@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import io
+import logging
 import os
 import shutil
 import threading
@@ -33,6 +34,8 @@ from auth.models import init_db
 from auth.quota import get_current_user, record_usage, require_quota
 from billing import router as billing_router
 
+
+logger = logging.getLogger(__name__)
 
 BASE_DIR = Path(__file__).resolve().parent
 SHARED_3D_DIR = BASE_DIR.parent / "shared-3d-assets"
@@ -179,6 +182,27 @@ def _save_uploads(uploads: list[UploadFile], dest_dir: Path) -> list[Path]:
     paths = [_save_upload(u, dest_dir) for u in uploads]
     paths.sort(key=lambda p: natural_sort_key(p))
     return paths
+
+
+def _upload_log_context(uploads: list[UploadFile], saved_paths: list[Path] | None = None) -> dict[str, object]:
+    context: dict[str, object] = {
+        "uploads": [
+            {
+                "filename": upload.filename,
+                "content_type": upload.content_type,
+            }
+            for upload in uploads
+        ]
+    }
+    if saved_paths is not None:
+        context["saved_paths"] = [
+            {
+                "path": str(path),
+                "size_bytes": path.stat().st_size if path.exists() else None,
+            }
+            for path in saved_paths
+        ]
+    return context
 
 
 def _out(batch_id: str, name: str) -> Path:
@@ -697,7 +721,11 @@ async def api_images_to_pdf(files: list[UploadFile] = File(...)) -> FileResponse
     try:
         pdf_tools.images_to_pdf(saved, out)
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc))
+        log_context = _upload_log_context(files, saved)
+        log_context["batch_id"] = batch_id
+        log_context["output_path"] = str(out)
+        logger.exception("images-to-pdf conversion failed: %s", log_context)
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
     return _file_response(out, "images.pdf")
 
 

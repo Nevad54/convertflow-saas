@@ -2,12 +2,16 @@
 from __future__ import annotations
 
 import io
+import logging
 import re
 import shutil
 import subprocess
 import tempfile
 from pathlib import Path
 from typing import Callable, Sequence
+
+
+logger = logging.getLogger(__name__)
 
 
 # ===========================================================================
@@ -109,10 +113,22 @@ def _conversion_pipeline(
             candidate = tmp / f"{name}.pdf"
             try:
                 fn(candidate)
-            except Exception as exc:
+            except Exception:
+                logger.exception(
+                    "PDF conversion engine failed: engine=%s candidate=%s output=%s",
+                    name,
+                    candidate,
+                    output_path,
+                )
                 continue                                   # engine failed, try next
 
             if not candidate.exists() or candidate.stat().st_size == 0:
+                logger.warning(
+                    "PDF conversion engine produced empty output: engine=%s candidate=%s output=%s",
+                    name,
+                    candidate,
+                    output_path,
+                )
                 continue
 
             passed, notes = _qa_check_pdf(candidate)
@@ -2504,13 +2520,48 @@ def pdf_to_excel(input_path: Path, output_path: Path, engine: str = "basic") -> 
 def images_to_pdf(input_paths: Sequence[Path], output_path: Path) -> None:
     def _build(out: Path) -> None:
         from PIL import Image as PILImage
-        images: list[PILImage.Image] = []
-        for p in input_paths:
-            img = PILImage.open(p).convert("RGB")
-            images.append(img)
-        if not images:
-            raise ValueError("No images provided.")
-        images[0].save(str(out), save_all=True, append_images=images[1:])
+        images = []
+        image_details: list[dict[str, object]] = []
+        try:
+            for p in input_paths:
+                details: dict[str, object] = {
+                    "filename": p.name,
+                    "path": str(p),
+                }
+                try:
+                    details["size_bytes"] = p.stat().st_size
+                except OSError:
+                    pass
+                try:
+                    with PILImage.open(p) as img:
+                        details.update(
+                            {
+                                "format": img.format,
+                                "mode": img.mode,
+                                "size": img.size,
+                            }
+                        )
+                        converted = img.convert("RGB")
+                except Exception as exc:
+                    raise RuntimeError(
+                        f"Could not load image for PDF conversion: {details}"
+                    ) from exc
+
+                images.append(converted)
+                image_details.append(details)
+
+            if not images:
+                raise ValueError("No images provided.")
+
+            try:
+                images[0].save(str(out), save_all=True, append_images=images[1:])
+            except Exception as exc:
+                raise RuntimeError(
+                    f"Could not save PDF from images: {image_details}"
+                ) from exc
+        finally:
+            for image in images:
+                image.close()
 
     _conversion_pipeline([("pil", _build)], output_path)
 
